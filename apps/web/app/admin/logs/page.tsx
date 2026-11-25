@@ -15,13 +15,15 @@ import { apiFetch } from '../../../lib/http'
 import { toFaDigits, tehranInstant } from '../../../lib/jalali'
 import { AuditTable, type AuditRow, type SessionRow } from '../../../components/admin/LogTable'
 import { SessionTable } from '../../../components/admin/SessionTable'
+import TabStrip from '../../../components/ui/TabStrip'
+import { AdminHeader } from '../../../components/admin/AdminHeader'
 import {
   LogFilters, EMPTY_FILTERS, hasActiveFilter,
   type Filters, type Tab,
 } from '../../../components/admin/LogFilters'
 
-const CARD = 'rounded-2xl border border-[#E7E2D6] bg-white shadow-[0_2px_10px_rgba(28,27,23,0.05)]'
-const RING = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7A66A]'
+const CARD = 'rounded-card border border-line/15 bg-surface shadow-e1'
+const RING = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep'
 
 const TABS = [['audit', 'رویدادها'], ['sessions', 'نشست‌ها']] as const
 
@@ -140,83 +142,67 @@ export default function AdminLogsPage() {
   const dirty = hasActiveFilter(f)
 
   return (
-    <div className="min-h-screen bg-[#F7F5F0] pb-24 text-[#1C1B17]">
-      <div className="mx-auto max-w-[1180px] px-4 pt-6 sm:px-6">
+    <main className="adm-page">
+      <AdminHeader
+        icon={<ScrollText size={26} className="text-gold-text" aria-hidden />}
+        title="ژورنال رویدادها"
+        description="چه کسی، چه زمانی، از کجا، چه کرد، روی هر بازیگر یا IP بزنید تا فیلتر شود"
+        actions={
+          <button type="button" onClick={reload} disabled={loading} aria-label="تازه‌سازی"
+            className={`inline-flex size-11 items-center justify-center rounded-field border border-gold/35 bg-gold/10 text-gold-text transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 ${RING}`}>
+            {loading ? <Loader2 size={16} className="animate-spin" aria-hidden /> : <RefreshCw size={16} aria-hidden />}
+          </button>
+        } />
 
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-[19px] font-bold">ژورنال رویدادها</h1>
-            <p className="mt-1 text-[12.5px] text-[#6F6A5C]">
-              چه کسی، چه زمانی، از کجا، چه کرد، روی هر بازیگر یا IP بزنید تا فیلتر شود
+      {/* نوار تبِ مشترک: دکمه‌های ساده با aria-pressed، نه tabِ چرخشی */}
+      <TabStrip value={tab} onChange={k => switchTab(k as Tab)} style={{ marginBottom: 0 }}
+        tabs={TABS.map(([key, label]) => ({ key, label }))} />
+
+      <div className={`${CARD} p-4`}>
+        <LogFilters tab={tab} f={f} setF={setF} actionOptions={actionOptions} names={names} />
+      </div>
+
+      {pendingUA && rows.length > 0 && (
+        <p className="m-0 rounded-field bg-gold/10 px-3 py-2 text-xs text-gold-text">
+          ستون «دستگاه» خالی است چون مهاجرت ۱۰۴ هنوز اجرا نشده، بقیه‌ی ردیف‌ها درست‌اند
+        </p>
+      )}
+
+      <section id="logpanel" aria-label={tab === 'audit' ? 'رویدادها' : 'نشست‌ها'} className={`${CARD} overflow-hidden`}>
+        {loading ? (
+          <div className="space-y-2 p-4" aria-busy="true">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="h-9 animate-pulse rounded-field bg-line/[.06]" />
+            ))}
+          </div>
+        ) : err ? (
+          <div className="p-8 text-center">
+            <AlertCircle size={22} className="mx-auto mb-2 text-danger" aria-hidden />
+            <p className="m-0 text-sm font-semibold text-danger-ink">{err}</p>
+            <button type="button" onClick={reload}
+              className={`mt-3 inline-flex h-11 items-center rounded-field border border-line/20 bg-surface px-4 text-sm font-semibold text-ink-2 ${RING}`}>
+              دوباره
+            </button>
+          </div>
+        ) : !rows.length ? (
+          <div className="p-8 text-center">
+            <ScrollText size={22} className="mx-auto mb-2 text-ink-3" aria-hidden />
+            <p className="m-0 text-sm text-ink-2">
+              {pendingTable
+                ? 'این جدول هنوز در دیتابیس نیست'
+                : dirty ? 'با این فیلترها چیزی پیدا نشد' : 'هنوز رویدادی ثبت نشده'}
             </p>
           </div>
-          <button type="button" onClick={reload} disabled={loading} aria-label="تازه‌سازی"
-            className={`rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] p-3 text-[#8F6531] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 ${RING}`}>
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-          </button>
-        </div>
+        ) : tab === 'audit'
+          ? <AuditTable rows={rows as AuditRow[]} names={names} onFilter={onFilter} />
+          : <SessionTable rows={rows as SessionRow[]} names={names} onFilter={onFilter} />}
+      </section>
 
-        {/* ⚠️ بدونِ `tabIndex`ِ چرخشی. نسخه‌ی قبلی تبِ غیرفعال را
-            `tabIndex={-1}` می‌کرد بی‌آنکه کلیدِ جهت‌دار را هندل کند —
-            یعنی کاربرِ کیبورد اصلا نمی‌توانست به آن برسد. دو دکمه‌ی
-            عادیِ tab-pذیر درست‌تر است. */}
-        <div className="mb-4 flex gap-2" role="tablist">
-          {TABS.map(([k, label]) => (
-            <button key={k} type="button" role="tab" id={`logtab-${k}`}
-              aria-selected={tab === k} aria-controls="logpanel"
-              onClick={() => switchTab(k)}
-              className={`rounded-[10px] px-4 py-2.5 text-[13px] font-bold transition ${RING} ${
-                tab === k ? 'bg-[#1C1B17] text-white' : 'border border-[#E7E2D6] bg-white text-[#5B564B] hover:border-[#C7A66A]'
-              }`}>{label}</button>
-          ))}
-        </div>
-
-        <div className={`${CARD} mb-4 p-4`}>
-          <LogFilters tab={tab} f={f} setF={setF} actionOptions={actionOptions} names={names} />
-        </div>
-
-        {pendingUA && rows.length > 0 && (
-          <p className="mb-3 rounded-[10px] bg-[rgba(199,166,106,0.12)] px-3 py-2 text-[11.5px] text-[#8F6531]">
-            ستون «دستگاه» خالی است چون مهاجرت ۱۰۴ هنوز اجرا نشده، بقیه‌ی ردیف‌ها درست‌اند
-          </p>
-        )}
-
-        <div id="logpanel" role="tabpanel" aria-labelledby={`logtab-${tab}`} className={`${CARD} overflow-hidden`}>
-          {loading ? (
-            <div className="space-y-2 p-4" aria-busy="true">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="h-9 animate-pulse rounded-[8px] bg-[#F0ECE2]" />
-              ))}
-            </div>
-          ) : err ? (
-            <div className="p-10 text-center">
-              <AlertCircle size={22} className="mx-auto mb-2 text-[#B91C1C]" aria-hidden />
-              <p className="text-[13px] font-semibold text-[#B91C1C]">{err}</p>
-              <button type="button" onClick={reload}
-                className={`mt-3 rounded-[10px] border border-[#E7E2D6] bg-white px-4 py-2.5 text-[12.5px] font-bold text-[#5B564B] ${RING}`}>
-                دوباره
-              </button>
-            </div>
-          ) : !rows.length ? (
-            <div className="p-10 text-center">
-              <ScrollText size={22} className="mx-auto mb-2 text-[#9A968B]" aria-hidden />
-              <p className="text-[13px] text-[#6F6A5C]">
-                {pendingTable
-                  ? 'این جدول هنوز در دیتابیس نیست'
-                  : dirty ? 'با این فیلترها چیزی پیدا نشد' : 'هنوز رویدادی ثبت نشده'}
-              </p>
-            </div>
-          ) : tab === 'audit'
-            ? <AuditTable rows={rows as AuditRow[]} names={names} onFilter={onFilter} />
-            : <SessionTable rows={rows as SessionRow[]} names={names} onFilter={onFilter} />}
-        </div>
-
-        {!loading && !err && rows.length > 0 && (
-          <p className="mt-3 text-center text-[11.5px] text-[#9A968B]">
-            {toFaDigits(String(rows.length))} ردیف{rows.length >= 150 && ' — سقف هر صفحه؛ بازه‌ی تاریخ را تنگ‌تر کنید'}
-          </p>
-        )}
-      </div>
-    </div>
+      {!loading && !err && rows.length > 0 && (
+        <p className="m-0 text-center text-xs text-ink-2">
+          {toFaDigits(String(rows.length))} ردیف{rows.length >= 150 && ' — سقف هر صفحه؛ بازه‌ی تاریخ را تنگ‌تر کنید'}
+        </p>
+      )}
+    </main>
   )
 }

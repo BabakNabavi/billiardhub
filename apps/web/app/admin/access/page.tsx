@@ -7,10 +7,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../../lib/http'
 import PermissionsDialog, { type PermGroup } from '../../../components/admin/PermissionsDialog'
+import { AdminHeader } from '../../../components/admin/AdminHeader'
+import { Button } from '../../../components/ui/Button'
 import { ShieldCheck, Loader2, Search, UserPlus, UserMinus, AlertCircle, SlidersHorizontal, Crown } from 'lucide-react'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
-const GOLD_D = '#8F6531', FELT = '#0E7A38'
 const faNum = (s: unknown) => String(s ?? '').replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]!)
 
 interface U {
@@ -92,144 +92,129 @@ export default function AdminAccess() {
     finally { setBusy('') }
   }
 
-  const card: React.CSSProperties = {
-    background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, padding: 14, marginBottom: 10,
-  }
   const name = (u: U) => `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || 'بدون نام'
 
   return (
-    <div dir="rtl" style={{ fontFamily: 'var(--font-base)', maxWidth: 760 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-        <ShieldCheck size={22} style={{ color: GOLD_D }} />
-        <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>دسترسی ادمین</h1>
-      </div>
-      <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 16px' }}>
-        ادمین به همه‌ی داده‌های مالی، تسویه‌ها و اطلاعات کاربران دسترسی دارد
-        <b style={{ color: INK }}> این دسترسی را فقط به کسی بدهید که کاملا به او اطمینان دارید</b>
-        {' '}هر اعطا و لغو در گزارش ممیزی ثبت می‌شود
-      </p>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<ShieldCheck size={26} className="text-gold-text" aria-hidden />}
+        title="دسترسی ادمین"
+        description={
+          <>
+            ادمین به همه‌ی داده‌های مالی، تسویه‌ها و اطلاعات کاربران دسترسی دارد
+            <b className="text-ink"> این دسترسی را فقط به کسی بدهید که کاملا به او اطمینان دارید</b>
+            {' '}هر اعطا و لغو در گزارش ممیزی ثبت می‌شود
+          </>
+        } />
 
       {msg && (
-        <div style={{
-          marginBottom: 12, padding: '11px 14px', borderRadius: 11, fontSize: 12.5, fontWeight: 700,
-          background: msg.ok ? 'rgba(48,197,90,0.09)' : 'rgba(239,68,68,0.07)',
-          border: `1px solid ${msg.ok ? 'rgba(48,197,90,0.28)' : 'rgba(239,68,68,0.26)'}`,
-          color: msg.ok ? FELT : '#991B1B', lineHeight: 1.9,
-        }}>{msg.text}</div>
-      )}
-
-      {/* ── جست‌وجو ── */}
-      <div style={{ ...card, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        <Search size={15} style={{ color: MUT }} />
-        <input value={q} placeholder="شماره موبایل یا نام…"
-          onChange={e => setQ(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') void load(q) }}
-          style={{
-            flex: 1, minWidth: 180, padding: '9px 11px', borderRadius: 9,
-            border: `1px solid ${LINE}`, background: '#FAFAFA',
-            fontSize: 14, fontFamily: 'inherit',
-          }} />
-        <button onClick={() => void load(q)} style={{
-          padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 800,
-          fontFamily: 'inherit', cursor: 'pointer',
-          border: '1px solid rgba(199,166,106,0.42)', background: 'rgba(199,166,106,0.14)', color: GOLD_D,
-        }}>جست‌وجو</button>
-      </div>
-
-      {q.length > 0 && q.length < 3 && (
-        <div style={{ fontSize: 12, color: MUT, marginBottom: 12 }}>
-          دست‌کم سه نویسه بنویسید
+        <div role={msg.ok ? 'status' : 'alert'}
+          className={`rounded-card border px-4 py-3 text-sm font-semibold leading-loose ${msg.ok
+            ? 'border-success/30 bg-success/10 text-success'
+            : 'border-danger/30 bg-danger/5 text-danger-ink'}`}>
+          {msg.text}
         </div>
       )}
 
+      {/* ── جست‌وجو ── */}
+      <form role="search" className="adm-card grid gap-2"
+        onSubmit={e => { e.preventDefault(); void load(q) }}>
+        <div className="adm-toolbar">
+          <div className="adm-grow relative">
+            <label htmlFor="access-q" className="sr-only">شماره موبایل یا نام</label>
+            <Search size={16} aria-hidden className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-ink-3" />
+            <input id="access-q" type="search" value={q} placeholder="شماره موبایل یا نام…"
+              onChange={e => setQ(e.target.value)}
+              className="h-11 w-full rounded-field border border-line/20 bg-surface pe-3 ps-9 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep" />
+          </div>
+          <Button type="submit" size="sm" variant="primary">جست‌وجو</Button>
+        </div>
+        {q.length > 0 && q.length < 3 && (
+          <p className="m-0 text-xs text-ink-2">دست‌کم سه نویسه بنویسید</p>
+        )}
+      </form>
+
       {results.length > 0 && (
-        <>
-          <div style={{ fontSize: 13.5, fontWeight: 800, color: INK, margin: '14px 0 8px' }}>نتایج جست‌وجو</div>
+        <section aria-labelledby="access-results" className="grid gap-3">
+          <h2 id="access-results" className="m-0 text-xl font-semibold text-ink">نتایج جست‌وجو</h2>
           {results.map(u => (
-            <div key={u.id} style={{ ...card, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: INK }}>{name(u)}</div>
-                <div style={{ fontSize: 12, color: SEC, marginTop: 3 }}>
+            <div key={u.id} className="adm-card flex flex-wrap items-center gap-3">
+              <div className="min-w-0 basis-40 flex-1">
+                <div className="adm-break text-sm font-semibold text-ink">{name(u)}</div>
+                <div className="mt-1 text-xs text-ink-2">
                   {faNum(u.phone)} · {ROLE_FA[u.primaryRole ?? 'user'] ?? u.primaryRole}
                 </div>
               </div>
               {u.primaryRole === 'admin' ? (
-                <button disabled={busy === u.id || u.id === me} onClick={() => void toggle(u, false)}
-                  title={u.id === me ? 'دسترسی خودتان را نمی‌توانید بردارید' : undefined}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    padding: '8px 15px', borderRadius: 999, fontSize: 12.5, fontWeight: 700,
-                    fontFamily: 'inherit', cursor: u.id === me ? 'not-allowed' : 'pointer',
-                    opacity: u.id === me || busy === u.id ? 0.5 : 1,
-                    border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.07)', color: '#dc2626',
-                  }}><UserMinus size={13} /> برداشتن دسترسی</button>
+                <Button size="sm" variant="danger-ghost" icon={<UserMinus size={14} aria-hidden />}
+                  disabled={busy === u.id || u.id === me} onClick={() => void toggle(u, false)}
+                  title={u.id === me ? 'دسترسی خودتان را نمی‌توانید بردارید' : undefined}>
+                  برداشتن دسترسی
+                </Button>
               ) : (
-                <button disabled={busy === u.id} onClick={() => void toggle(u, true)} style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 5,
-                  padding: '8px 15px', borderRadius: 999, fontSize: 12.5, fontWeight: 700,
-                  fontFamily: 'inherit', cursor: 'pointer', opacity: busy === u.id ? 0.5 : 1,
-                  border: '1px solid rgba(48,197,90,0.34)', background: 'rgba(48,197,90,0.12)', color: FELT,
-                }}><UserPlus size={13} /> دادن دسترسی ادمین</button>
+                <Button size="sm" variant="primary" icon={<UserPlus size={14} aria-hidden />}
+                  disabled={busy === u.id} onClick={() => void toggle(u, true)}>
+                  دادن دسترسی ادمین
+                </Button>
               )}
             </div>
           ))}
-        </>
+        </section>
       )}
 
       {/* ── ادمین‌های فعلی ── */}
-      <div style={{ fontSize: 13.5, fontWeight: 800, color: INK, margin: '18px 0 8px' }}>
-        ادمین‌های فعلی {admins.length > 0 && <span style={{ color: MUT, fontWeight: 600 }}>({faNum(admins.length)})</span>}
-      </div>
+      <section aria-labelledby="access-admins" className="grid gap-3">
+        <h2 id="access-admins" className="m-0 text-xl font-semibold text-ink">
+          ادمین‌های فعلی {admins.length > 0 && <span className="text-sm font-normal text-ink-2">({faNum(admins.length)})</span>}
+        </h2>
 
-      {loading ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: SEC, fontSize: 13, padding: 16 }}>
-          <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> در حال بارگذاری…
-        </div>
-      ) : admins.map(u => {
-        const p = perm[u.id] ?? []
-        const isSuper = p.includes('*')
-        const total = groups.reduce((n, g) => n + g.items.length, 0)
-        return (
-        <div key={u.id} style={{ ...card, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          {isSuper
-            ? <Crown size={16} style={{ color: GOLD_D, flexShrink: 0 }} />
-            : <ShieldCheck size={16} style={{ color: GOLD_D, flexShrink: 0 }} />}
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 800, color: INK }}>
-              {name(u)}
-              {u.id === me && <span style={{ fontSize: 11, color: MUT, fontWeight: 600 }}> — شما</span>}
-            </div>
-            <div style={{ fontSize: 12, color: SEC, marginTop: 3 }}>
-              {faNum(u.phone)}
-              {groups.length > 0 && (
-                <span style={{ marginInlineStart: 8, color: isSuper ? GOLD_D : MUT, fontWeight: 700 }}>
-                  · {isSuper ? 'سوپرادمین — دسترسی کامل' : `${faNum(p.length)} از ${faNum(total)} بخش`}
-                </span>
-              )}
-            </div>
+        {loading ? (
+          <div role="status" className="flex items-center gap-2 p-4 text-sm text-ink-2">
+            <Loader2 size={16} className="motion-safe:animate-spin" aria-hidden /> در حال بارگذاری…
           </div>
+        ) : admins.map(u => {
+          const p = perm[u.id] ?? []
+          const isSuper = p.includes('*')
+          const total = groups.reduce((n, g) => n + g.items.length, 0)
+          return (
+            <div key={u.id} className="adm-card flex flex-wrap items-center gap-3">
+              {isSuper
+                ? <Crown size={16} className="shrink-0 text-gold-text" aria-hidden />
+                : <ShieldCheck size={16} className="shrink-0 text-gold-text" aria-hidden />}
+              <div className="min-w-0 basis-40 flex-1">
+                <div className="adm-break text-sm font-semibold text-ink">
+                  {name(u)}
+                  {u.id === me && <span className="text-xs font-normal text-ink-2"> — شما</span>}
+                </div>
+                <div className="mt-1 text-xs text-ink-2">
+                  {faNum(u.phone)}
+                  {groups.length > 0 && (
+                    <span className={`ms-2 font-semibold ${isSuper ? 'text-gold-text' : ''}`}>
+                      · {isSuper ? 'سوپرادمین — دسترسی کامل' : `${faNum(p.length)} از ${faNum(total)} بخش`}
+                    </span>
+                  )}
+                </div>
+              </div>
 
-          {/* تنظیم دسترسی — سوپرادمین از این‌جا تغییر نمی‌کند */}
-          {groups.length > 0 && !isSuper && (
-            <button onClick={() => setEditing(u)} style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5,
-              padding: '7px 13px', borderRadius: 999, fontSize: 12, fontWeight: 700,
-              fontFamily: 'inherit', cursor: 'pointer',
-              border: '1px solid rgba(199,166,106,0.42)', background: 'rgba(199,166,106,0.12)', color: GOLD_D,
-            }}><SlidersHorizontal size={12} /> دسترسی‌ها</button>
-          )}
-
-          {u.id !== me && admins.length > 1 && (
-            <button disabled={busy === u.id} onClick={() => void toggle(u, false)} style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5,
-              padding: '7px 13px', borderRadius: 999, fontSize: 12, fontWeight: 700,
-              fontFamily: 'inherit', cursor: 'pointer', opacity: busy === u.id ? 0.5 : 1,
-              border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.07)', color: '#dc2626',
-            }}><UserMinus size={12} /> برداشتن</button>
-          )}
-        </div>
-        )
-      })}
+              <div className="adm-actions">
+                {/* تنظیم دسترسی — سوپرادمین از این‌جا تغییر نمی‌کند */}
+                {groups.length > 0 && !isSuper && (
+                  <Button size="sm" variant="primary" icon={<SlidersHorizontal size={14} aria-hidden />}
+                    onClick={() => setEditing(u)}>
+                    دسترسی‌ها
+                  </Button>
+                )}
+                {u.id !== me && admins.length > 1 && (
+                  <Button size="sm" variant="danger-ghost" icon={<UserMinus size={14} aria-hidden />}
+                    disabled={busy === u.id} onClick={() => void toggle(u, false)}>
+                    برداشتن
+                  </Button>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </section>
 
       {editing && (
         <PermissionsDialog
@@ -244,16 +229,12 @@ export default function AdminAccess() {
       )}
 
       {!loading && admins.length === 1 && (
-        <div style={{
-          display: 'flex', gap: 8, padding: '11px 14px', borderRadius: 11, marginTop: 4,
-          background: 'rgba(199,166,106,0.10)', border: '1px solid rgba(199,166,106,0.32)',
-          fontSize: 12.5, color: GOLD_D, fontWeight: 700, lineHeight: 1.9,
-        }}>
-          <AlertCircle size={15} style={{ flexShrink: 0, marginTop: 2 }} />
+        <div role="note" className="flex gap-2 rounded-card border border-gold/30 bg-gold/10 px-4 py-3 text-sm font-semibold leading-loose text-gold-text">
+          <AlertCircle size={16} className="mt-1 shrink-0" aria-hidden />
           تنها ادمین سامانه شمایید، تا وقتی ادمین دومی نباشد، دسترسی شما قابل برداشتن نیست —
           این عمدی است تا سامانه بی‌ادمین نماند
         </div>
       )}
-    </div>
+    </main>
   )
 }

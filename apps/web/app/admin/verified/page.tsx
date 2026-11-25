@@ -23,9 +23,9 @@
    ───────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
+
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Inbox } from 'lucide-react'
+import { Inbox } from 'lucide-react'
 import { useAuthStore } from '../../../store/auth.store'
 import { apiFetch } from '../../../lib/http'
 import { notify } from '../../../lib/ui/dialogs'
@@ -33,11 +33,8 @@ import TabStrip from '../../../components/ui/TabStrip'
 import ScrollList from '../../../components/ui/ScrollList'
 import VerifiedBadge from '../../../components/VerifiedBadge'
 import VerifiedRow from '../../../components/admin/VerifiedRow'
+import { AdminHeader } from '../../../components/admin/AdminHeader'
 
-const GOLD_D = '#8F6531'
-const TEXT = '#1C1B17'
-const MUT = '#6F6A5C'
-const LINE = '#E7E2D6'
 const BLUE = '#0095F6'
 
 type Kind = 'club' | 'coach' | 'referee' | 'player' | 'technician' | 'seller' | 'manufacturer'
@@ -244,27 +241,16 @@ export default function AdminVerifiedPage() {
   if (!isAdminUser) return null
 
   return (
-    <div dir="rtl" style={{ minHeight: '70vh', background: '#F7F5F0', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT, paddingBottom: 64 }}>
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px clamp(16px,3vw,28px) 0' }}>
+    <main className="adm-page">
+      <AdminHeader
+        title={<>تیک آبی <VerifiedBadge title="" style={{ marginInlineStart: 0 }} /></>}
+        description="اعطا و پس‌گرفتن تیک برای هر هفت نقش، تیک یعنی «مدرکش دیده و تأیید شده»؛ برداشتنش پروفایل را از سایت حذف نمی‌کند" />
 
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
-          <div>
-            <span style={{ fontSize: 11, fontWeight: 800, color: MUT }}>نشان تأیید</span>
-            <h1 style={{ fontSize: 'clamp(18px,2.4vw,22px)', fontWeight: 900, margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: 6 }}>
-              تیک آبی <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />
-            </h1>
-            <p style={{ fontSize: 12.5, color: MUT, margin: '6px 0 0', lineHeight: 1.9, maxWidth: 560 }}>
-              اعطا و پس‌گرفتن تیک برای هر هفت نقش، تیک یعنی «مدرکش دیده و تأیید شده»؛
-              برداشتنش پروفایل را از سایت حذف نمی‌کند
-            </p>
-          </div>
-          <Link href="/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, textDecoration: 'none', fontSize: 12.5, fontWeight: 700, background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)', color: GOLD_D }}>
-            <ArrowLeft size={13} /> پنل ادمین
-          </Link>
-        </div>
-
+      {/* یک نوار تب برای وضعیت، و فیلتر نقش در یک select — دو نوارِ هم‌شکل نه */}
+      <div className="grid gap-3">
         <TabStrip
           value={tab}
+          style={{ marginBottom: 0 }}
           onChange={k => setTab(k as typeof tab)}
           tabs={[
             { key: 'waiting', label: 'در انتظار', count: waiting.length, fg: '#92600A', bg: 'rgba(245,158,11,0.12)' },
@@ -272,57 +258,54 @@ export default function AdminVerifiedPage() {
             { key: 'all', label: 'همه', count: rows?.length ?? 0 },
           ]}
         />
-
-        {/* فیلتر نقش — همان کنترل مشترک سایت، نه یک ردیف دستی
-            تازه. hover و focus-visible و حالت انتخاب داخل .lq-seg است. */}
-        <div className="lq-seg" style={{ flexWrap: 'wrap', marginBottom: 14 }}>
-          {([{ key: 'all' as const, label: 'همه‌ی نقش‌ها' }, ...KINDS]).map(k => (
-            <button key={k.key} type="button" aria-pressed={kind === k.key}
-              onClick={() => setKind(k.key as Kind | 'all')}
-              style={{ minWidth: 0 }}>
-              {k.label}
-            </button>
-          ))}
+        <div className="adm-toolbar">
+          <label className="flex-1 basis-48 md:max-w-xs">
+            <span className="sr-only">فیلتر نقش</span>
+            <select value={kind} onChange={e => setKind(e.target.value as Kind | 'all')} className="h-11 w-full">
+              <option value="all">همه‌ی نقش‌ها</option>
+              {KINDS.map(k => <option key={k.key} value={k.key}>{k.label}</option>)}
+            </select>
+          </label>
         </div>
-
-        {err && (
-          <div style={{ marginBottom: 12, background: 'rgba(178,59,46,0.06)', border: '1px solid rgba(178,59,46,0.24)', color: '#B23B2E', borderRadius: 12, padding: '10px 14px', fontSize: 12.5, fontWeight: 700 }}>
-            {err}
-          </div>
-        )}
-
-        {rows === null ? (
-          /* اسکلت لودینگ — صفحه نباید یک‌باره از هیچ به فهرست بپرد */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {[0, 1, 2, 3].map(i => (
-              <div key={i} style={{ height: 66, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14, opacity: 0.6 }} />
-            ))}
-          </div>
-        ) : shown.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '56px 20px', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 18 }}>
-            <Inbox size={34} style={{ color: MUT, opacity: 0.5, marginBottom: 10 }} />
-            <p style={{ fontSize: 14.5, fontWeight: 800, margin: '0 0 6px' }}>
-              {tab === 'waiting' ? 'چیزی در انتظار نیست' : 'موردی نیست'}
-            </p>
-            <p style={{ fontSize: 12.5, color: MUT, margin: 0, lineHeight: 1.9 }}>
-              {tab === 'waiting'
-                ? 'وقتی کسی مدرکش را آپلود کند، همین‌جا ظاهر می‌شود'
-                : 'با تب دیگری یا نقش دیگری امتحان کنید'}
-            </p>
-          </div>
-        ) : (
-          <ScrollList count={shown.length} min={7} gap={10}>
-            {shown.map(r => (
-              <VerifiedRow key={r.key} busy={busy === r.key}
-                onToggle={next => void act(r, next)}
-                row={{
-                  key: r.key, kindLabel: LABEL_OF[r.kind], name: r.name, sub: r.sub,
-                  href: r.href, verified: r.verified, hasDoc: r.hasDoc, published: r.published,
-                }} />
-            ))}
-          </ScrollList>
-        )}
       </div>
-    </div>
+
+      {err && (
+        <div role="alert" className="rounded-card border border-danger/30 bg-danger/5 px-4 py-3 text-sm font-semibold text-danger-ink">
+          {err}
+        </div>
+      )}
+
+      {rows === null ? (
+        /* اسکلت لودینگ — صفحه نباید یک‌باره از هیچ به فهرست بپرد */
+        <ul aria-busy="true" aria-label="در حال بارگذاری" className="m-0 grid list-none gap-3 p-0">
+          {[0, 1, 2, 3].map(i => (
+            <li key={i} className="h-16 rounded-card border border-line/10 bg-surface motion-safe:animate-pulse" />
+          ))}
+        </ul>
+      ) : shown.length === 0 ? (
+        <div className="adm-card py-12 text-center">
+          <Inbox size={32} className="mx-auto mb-3 text-ink-3" aria-hidden />
+          <p className="m-0 mb-2 text-sm font-semibold text-ink">
+            {tab === 'waiting' ? 'چیزی در انتظار نیست' : 'موردی نیست'}
+          </p>
+          <p className="m-0 text-xs text-ink-2">
+            {tab === 'waiting'
+              ? 'وقتی کسی مدرکش را آپلود کند، همین‌جا ظاهر می‌شود'
+              : 'با تب دیگری یا نقش دیگری امتحان کنید'}
+          </p>
+        </div>
+      ) : (
+        <ScrollList count={shown.length} min={7} gap={12}>
+          {shown.map(r => (
+            <VerifiedRow key={r.key} busy={busy === r.key}
+              onToggle={next => void act(r, next)}
+              row={{
+                key: r.key, kindLabel: LABEL_OF[r.kind], name: r.name, sub: r.sub,
+                href: r.href, verified: r.verified, hasDoc: r.hasDoc, published: r.published,
+              }} />
+          ))}
+        </ScrollList>
+      )}
+    </main>
   )
 }

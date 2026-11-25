@@ -140,7 +140,7 @@ export function Entity({ type, id }: { type: string | null; id: string | null })
     <span className="inline-flex items-center gap-1.5">
       {type && <span className="text-[11.5px] text-[#5B564B]">{type}</span>}
       {type && id && <span className="text-[#D6D0C2]" aria-hidden>·</span>}
-      {id && <span dir="ltr" className={`${LATIN} text-[11px] text-[#9A968B]`}>{id.slice(0, 16)}</span>}
+      {id && <span dir="ltr" className={`${LATIN} adm-break text-[11px] text-[#9A968B]`} title={id}>{id.slice(0, 16)}</span>}
     </span>
   )
 }

@@ -8,14 +8,14 @@
 
    ⚠️ «دسترسی ادمین» عمدا در فهرست نیست: دادن دسترسی به دیگران کار
    سوپرادمین است. اگر تیک‌کردنی بود، اولین ادمینی که آن را می‌گرفت
-   می‌توانست خودش را سوپر کند یا مالک را بیرون بیندازد. */
+   می‌توانست خودش را سوپر کند یا مالک را بیرون بیندازد.
+
+   پوسته: `.adm-modal-backdrop` + `.adm-sheet` (موبایل برگه‌ی پایین). */
 
 import { useEffect, useState } from 'react'
 import { apiFetch } from '../../lib/http'
-import { X, Loader2, ShieldCheck, Check } from 'lucide-react'
-
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
-const GOLD_D = '#8F6531', FELT = '#0E7A38'
+import { X, ShieldCheck, Check } from 'lucide-react'
+import { Button } from '../ui/Button'
 
 export interface PermGroup { key: string; label: string; items: { key: string; label: string; hint?: string }[] }
 
@@ -66,36 +66,29 @@ export default function PermissionsDialog({
   const total = groups.reduce((n, g) => n + g.items.length, 0)
 
   return (
-    <div onClick={onClose} style={{
-      position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(20,18,14,0.45)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
-    }}>
-      <div onClick={e => e.stopPropagation()} dir="rtl" style={{
-        background: '#fff', borderRadius: 18, width: 'min(560px,100%)', maxHeight: '86vh',
-        display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-base)',
-        boxShadow: '0 24px 70px rgba(28,27,23,0.22)',
-      }}>
+    <div onClick={onClose} className="adm-modal-backdrop">
+      <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="perm-title"
+        className="adm-sheet">
         {/* سربرگ */}
-        <div style={{ padding: '16px 18px', borderBottom: `1px solid ${LINE}`, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <ShieldCheck size={18} style={{ color: GOLD_D, flexShrink: 0, marginTop: 2 }} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 900, color: INK }}>دسترسی‌های {user.name}</div>
-            <div style={{ fontSize: 11.5, color: MUT, marginTop: 3 }} className="bh-latin">{user.phone}</div>
+        <div className="flex items-start gap-3 border-b border-line/10 p-4">
+          <ShieldCheck size={18} className="mt-1 shrink-0 text-gold-text" aria-hidden />
+          <div className="min-w-0 flex-1">
+            <h2 id="perm-title" className="adm-break m-0 text-base font-semibold text-ink">دسترسی‌های {user.name}</h2>
+            <div className="bh-latin mt-1 text-xs text-ink-2">{user.phone}</div>
           </div>
-          <button onClick={onClose} aria-label="بستن" style={{
-            background: 'rgba(28,28,26,0.05)', border: `1px solid ${LINE}`, borderRadius: 10,
-            width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: SEC, flexShrink: 0,
-          }}><X size={16} /></button>
+          <button type="button" onClick={onClose} aria-label="بستن"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-field border border-line/10 bg-line/[.05] text-ink-2 hover:bg-line/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
+            <X size={16} aria-hidden />
+          </button>
         </div>
 
         {/* بدنه */}
-        <div style={{ overflowY: 'auto', padding: '4px 18px 14px' }}>
-          <p style={{ fontSize: 12, color: SEC, lineHeight: 2, margin: '12px 0 14px' }}>
+        <div className="overflow-y-auto overscroll-contain px-4 pb-4">
+          <p className="my-4 text-sm leading-loose text-ink-2">
             فقط بخش‌هایی که تیک بخورند برای این ادمین باز می‌شوند، بقیه‌ی صفحه‌ها نه در پنل
             دیده می‌شوند و نه از راه آدرس مستقیم باز می‌شوند
             <br />
-            <b style={{ color: INK }}>«دسترسی ادمین» در این فهرست نیست</b> — دادن دسترسی به دیگران
+            <b className="text-ink">«دسترسی ادمین» در این فهرست نیست</b> — دادن دسترسی به دیگران
             فقط کار شماست و قابل واگذاری نیست
           </p>
 
@@ -103,61 +96,49 @@ export default function PermissionsDialog({
             const on = g.items.filter(i => sel.has(i.key)).length
             const allOn = on === g.items.length
             return (
-              <div key={g.key} style={{ marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
-                  <span style={{ fontSize: 12.5, fontWeight: 900, color: INK }}>{g.label}</span>
-                  <span style={{ fontSize: 11, color: MUT }}>{on}/{g.items.length}</span>
-                  <button onClick={() => groupAll(g, !allOn)} style={{
-                    marginInlineStart: 'auto', fontSize: 11, fontWeight: 800, fontFamily: 'inherit',
-                    padding: '4px 10px', borderRadius: 8, cursor: 'pointer',
-                    border: `1px solid ${LINE}`, background: '#FAFAF7', color: SEC,
-                  }}>{allOn ? 'برداشتن همه' : 'انتخاب همه'}</button>
+              <fieldset key={g.key} className="m-0 mb-4 min-w-0 border-0 p-0">
+                <legend className="sr-only">{g.label}</legend>
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="text-sm font-semibold text-ink">{g.label}</span>
+                  <span className="text-xs text-ink-2">{on}/{g.items.length}</span>
+                  <button type="button" onClick={() => groupAll(g, !allOn)}
+                    className="ms-auto inline-flex h-11 items-center rounded-field border border-line/10 bg-paper px-3 text-xs font-semibold text-ink-2 hover:border-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
+                    {allOn ? 'برداشتن همه' : 'انتخاب همه'}
+                  </button>
                 </div>
-                <div style={{ display: 'grid', gap: 6 }}>
+                <div className="grid gap-2">
                   {g.items.map(i => {
                     const checked = sel.has(i.key)
                     return (
-                      <label key={i.key} style={{
-                        display: 'flex', alignItems: 'flex-start', gap: 9, cursor: 'pointer',
-                        padding: '9px 11px', borderRadius: 11, minHeight: 40,
-                        border: `1px solid ${checked ? 'rgba(199,166,106,0.42)' : LINE}`,
-                        background: checked ? 'rgba(199,166,106,0.09)' : '#fff',
-                      }}>
+                      <label key={i.key}
+                        className={`relative flex min-h-11 cursor-pointer items-start gap-2 rounded-card border p-3 focus-within:ring-2 focus-within:ring-gold-deep ${checked ? 'border-gold/40 bg-gold/10' : 'border-line/10 bg-surface'}`}>
                         <input type="checkbox" checked={checked} onChange={() => flip(i.key)}
-                          style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }} />
-                        <span aria-hidden style={{
-                          width: 18, height: 18, borderRadius: 6, flexShrink: 0, marginTop: 1,
-                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          border: `1.5px solid ${checked ? GOLD_D : '#CFC9BA'}`,
-                          background: checked ? GOLD_D : '#fff', color: '#fff',
-                        }}>{checked && <Check size={12} strokeWidth={3} />}</span>
-                        <span style={{ minWidth: 0 }}>
-                          <span style={{ display: 'block', fontSize: 13, fontWeight: 700, color: INK }}>{i.label}</span>
-                          {i.hint && <span style={{ display: 'block', fontSize: 11, color: MUT, marginTop: 2, lineHeight: 1.7 }}>{i.hint}</span>}
+                          className="peer absolute size-0 opacity-0" />
+                        <span aria-hidden
+                          className={`mt-1 inline-flex size-4 shrink-0 items-center justify-center rounded-chip border text-white ${checked ? 'border-gold-deep bg-gold-deep' : 'border-line/30 bg-surface'}`}>
+                          {checked && <Check size={12} strokeWidth={3} />}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-semibold text-ink">{i.label}</span>
+                          {i.hint && <span className="mt-1 block text-xs leading-loose text-ink-2">{i.hint}</span>}
                         </span>
                       </label>
                     )
                   })}
                 </div>
-              </div>
+              </fieldset>
             )
           })}
         </div>
 
         {/* پانویس */}
-        <div style={{ padding: '12px 18px', borderTop: `1px solid ${LINE}`, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, color: SEC, fontWeight: 700 }}>{sel.size} از {total} بخش</span>
-          {err && <span style={{ fontSize: 12, color: '#B23B2E', fontWeight: 700 }}>{err}</span>}
-          <button onClick={onClose} style={{
-            marginInlineStart: 'auto', padding: '9px 16px', borderRadius: 10, fontSize: 12.5, fontWeight: 800,
-            fontFamily: 'inherit', cursor: 'pointer', border: `1px solid ${LINE}`, background: '#FAFAF7', color: SEC,
-          }}>انصراف</button>
-          <button onClick={() => void save()} disabled={busy} style={{
-            padding: '9px 20px', borderRadius: 10, fontSize: 12.5, fontWeight: 800, fontFamily: 'inherit',
-            cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
-            border: '1px solid rgba(14,122,56,0.34)', background: 'rgba(14,122,56,0.12)', color: FELT,
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-          }}>{busy && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />}ذخیره</button>
+        <div className="flex flex-wrap items-center gap-3 border-t border-line/10 p-4">
+          <span className="text-xs font-semibold text-ink-2">{sel.size} از {total} بخش</span>
+          {err && <span role="alert" className="text-xs font-semibold text-danger-ink">{err}</span>}
+          <div className="adm-actions ms-auto">
+            <Button size="sm" variant="secondary" onClick={onClose}>انصراف</Button>
+            <Button size="sm" variant="primary" loading={busy} onClick={() => void save()}>ذخیره</Button>
+          </div>
         </div>
       </div>
     </div>

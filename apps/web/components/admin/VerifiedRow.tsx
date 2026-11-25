@@ -6,16 +6,13 @@
 
    از `app/admin/verified/page.tsx` جدا شد: آن فایل با فهرست و
    فیلترها از ۱۵۰ خط رد شده بود.
+
+   چیدمان: موبایل سه ردیف (نشان‌ها، نام، دکمه‌ها)؛ از md یک خط.
    ───────────────────────────────────────────────────────────── */
 
 import Link from 'next/link'
 import { ExternalLink, FileText, Loader2, ShieldOff } from 'lucide-react'
 import VerifiedBadge from '../VerifiedBadge'
-
-const SEC = '#5B564B'
-const MUT = '#6F6A5C'
-const LINE = '#E7E2D6'
-const BLUE = '#0095F6'
 
 export interface VerifiedRowData {
   key: string
@@ -28,6 +25,8 @@ export interface VerifiedRowData {
   published: boolean
 }
 
+const PILL = 'inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-1 text-xs font-semibold'
+
 export default function VerifiedRow({ row, busy, onToggle }: {
   row: VerifiedRowData
   busy: boolean
@@ -36,79 +35,55 @@ export default function VerifiedRow({ row, busy, onToggle }: {
   const locked = busy || !row.published
 
   return (
-    <div style={{
-      background: '#fff', border: `1px solid ${LINE}`, borderRadius: 14,
-      padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
-    }}>
-      <span style={{
-        fontSize: 10.5, fontWeight: 800, borderRadius: 999, padding: '3px 10px', flexShrink: 0,
-        color: SEC, background: 'rgba(17,17,16,0.04)', border: `1px solid ${LINE}`,
-      }}>{row.kindLabel}</span>
-
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontSize: 13.5, fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {row.name}{row.verified && <VerifiedBadge title="تیک آبی دارد" />}
-        </div>
-        <div style={{ fontSize: 11.5, color: MUT, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {row.sub}
-        </div>
+    <div className="adm-card flex flex-wrap items-center gap-3">
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
+        <span className={`${PILL} border-line/15 bg-line/[.05] text-ink-2`}>{row.kindLabel}</span>
+        <span className={`${PILL} ${row.hasDoc
+          ? 'border-success/25 bg-success/10 text-success'
+          : 'border-line/15 bg-line/[.05] text-ink-2'}`}>
+          <FileText size={12} aria-hidden />{row.hasDoc ? 'مدرک دارد' : 'بدون مدرک'}
+        </span>
+        {!row.published && (
+          <span className={`${PILL} border-danger/25 bg-danger/5 text-danger-ink`}>منتشر نشده</span>
+        )}
       </div>
 
-      <span style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4, flexShrink: 0,
-        fontSize: 11, fontWeight: 800, borderRadius: 999, padding: '3px 10px',
-        color: row.hasDoc ? '#0E7A38' : MUT,
-        background: row.hasDoc ? 'rgba(14,122,56,0.08)' : 'rgba(17,17,16,0.04)',
-        border: `1px solid ${row.hasDoc ? 'rgba(14,122,56,0.22)' : LINE}`,
-      }}>
-        <FileText size={11} />{row.hasDoc ? 'مدرک دارد' : 'بدون مدرک'}
-      </span>
+      <div className="min-w-0 basis-full md:basis-0 md:flex-1">
+        <div className="adm-title text-sm font-semibold text-ink" title={row.name}>
+          {row.name}{row.verified && <VerifiedBadge title="تیک آبی دارد" />}
+        </div>
+        <div className="adm-title mt-1 text-xs text-ink-2" title={row.sub}>{row.sub}</div>
+      </div>
 
-      {!row.published && (
-        <span style={{
-          fontSize: 11, fontWeight: 800, color: '#B23B2E', flexShrink: 0,
-          background: 'rgba(178,59,46,0.07)', border: '1px solid rgba(178,59,46,0.22)',
-          borderRadius: 999, padding: '3px 10px',
-        }}>منتشر نشده</span>
-      )}
-
-      <div style={{ display: 'flex', gap: 6, flexShrink: 0, alignItems: 'center' }}>
+      <div className="adm-actions">
         <Link href={row.href} target="_blank" rel="noopener noreferrer"
-          className="lq-icon-btn"
+          className="lq-icon-btn inline-flex size-11 items-center justify-center"
           title="دیدن صفحه‌ی عمومی" aria-label={`دیدن صفحه‌ی عمومی ${row.name}`}>
-          <ExternalLink size={15} />
+          <ExternalLink size={15} aria-hidden />
         </Link>
 
         {row.verified ? (
-          <button type="button" className="lq-act"
+          <button type="button" className="lq-act h-11 border border-danger/25 bg-danger/5 px-4 text-sm text-danger-ink disabled:opacity-60"
             onClick={() => onToggle(false)} disabled={busy}
             aria-label={`برداشتن تیک آبی از ${row.name}`}
-            title="پروفایل در سایت می‌ماند، فقط تیک برداشته می‌شود"
-            style={{
-              height: 34, padding: '0 14px', fontSize: 12.5,
-              border: '1px solid rgba(178,59,46,0.24)', background: 'rgba(178,59,46,0.06)',
-              color: '#B23B2E', opacity: busy ? 0.6 : 1,
-            }}>
-            {busy ? <Loader2 size={13} className="animate-spin" /> : <ShieldOff size={14} />}
+            title="پروفایل در سایت می‌ماند، فقط تیک برداشته می‌شود">
+            {busy ? <Loader2 size={14} className="animate-spin" aria-hidden /> : <ShieldOff size={14} aria-hidden />}
             برداشتن تیک
           </button>
         ) : (
           /* بدون مدرک هم اعطا ممکن است — گاهی ادمین مدرک را بیرون از
              سایت دیده — ولی رنگ کم‌رنگ‌تر یادآوری‌اش می‌کند. */
-          <button type="button" className="lq-act"
+          <button type="button"
+            className={`lq-act h-11 border px-4 text-sm text-[#0095F6] disabled:opacity-45 ${row.hasDoc
+              ? 'border-[#0095F6]/30 bg-[#0095F6]/10'
+              : 'border-[#0095F6]/15 bg-[#0095F6]/5'}`}
             onClick={() => onToggle(true)} disabled={locked}
             aria-label={`اعطای تیک آبی به ${row.name}`}
             title={row.published
               ? (row.hasDoc ? 'اعطای تیک آبی' : 'مدرکی آپلود نشده — با احتیاط')
-              : 'اول باید پروفایل منتشر شود'}
-            style={{
-              height: 34, padding: '0 14px', fontSize: 12.5,
-              border: `1px solid rgba(0,149,246,${row.hasDoc ? '0.30' : '0.16'})`,
-              background: `rgba(0,149,246,${row.hasDoc ? '0.10' : '0.05'})`,
-              color: BLUE, opacity: locked ? 0.45 : 1,
-            }}>
+              : 'اول باید پروفایل منتشر شود'}>
             {busy
-              ? <Loader2 size={13} className="animate-spin" />
+              ? <Loader2 size={14} className="animate-spin" aria-hidden />
               : <VerifiedBadge title="" style={{ marginInlineStart: 0 }} />}
             اعطای تیک
           </button>

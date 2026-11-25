@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
 import ScrollList from '../../../components/ui/ScrollList';
 import { apiFetch } from '../../../lib/http';
-import { CheckCircle, XCircle, Eye, Star, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, Star } from 'lucide-react';
+import TabStrip from '../../../components/ui/TabStrip';
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 
 interface VerificationRequest {
   id: string;
@@ -86,101 +88,86 @@ export default function AdminVerificationsPage() {
   if (!user || user.primaryRole !== 'admin') return null;
 
   return (
-    <div className="max-w-4xl mx-auto pb-10">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <Star size={24} className="text-yellow-500" />
-          تأیید کاربران
-        </h1>
-        {counts.pending > 0 && (
-          <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
-            <Clock size={14} />
-            {counts.pending.toLocaleString('fa-IR')} در انتظار
-          </span>
-        )}
-      </div>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Star size={26} className="text-gold-text" aria-hidden />}
+        title="تأیید کاربران"
+        description={counts.pending > 0 ? `${counts.pending.toLocaleString("fa-IR")} درخواست در انتظار` : undefined} />
 
-      {/* تب‌ها */}
-      <div className="flex gap-2 mb-6">
-        {[
-          { id: 'pending', label: 'در انتظار', count: counts.pending, color: 'bg-yellow-500' },
-          { id: 'verified', label: 'تأیید شده', count: counts.verified, color: 'bg-green-500' },
-          { id: 'rejected', label: 'رد شده', count: counts.rejected, color: 'bg-red-500' },
-        ].map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-              activeTab === tab.id ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400'
-            }`}>
-            {tab.label}
-            {tab.count > 0 && (
-              <span className={`${tab.color} text-white text-xs w-5 h-5 rounded-full flex items-center justify-center`}>
-                {tab.count}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
+      {err && (
+        <div role="alert" className="rounded-card border border-danger/30 bg-danger/5 px-4 py-3 text-sm font-semibold text-danger-ink">
+          {err}
+        </div>
+      )}
+
+      <TabStrip value={activeTab} onChange={setActiveTab} style={{ marginBottom: 0 }}
+        tabs={[
+          { key: 'pending', label: 'در انتظار', count: counts.pending, fg: '#92600A', bg: 'rgba(245,158,11,0.12)' },
+          { key: 'verified', label: 'تأیید شده', count: counts.verified, fg: '#0E7A38', bg: 'rgba(14,122,56,0.10)' },
+          { key: 'rejected', label: 'رد شده', count: counts.rejected, fg: '#B23B2E', bg: 'rgba(178,59,46,0.08)' },
+        ]} />
 
       {/* لیست */}
       {loading ? (
-        <div className="text-center py-20 text-gray-400">در حال بارگذاری...</div>
+        <ul aria-busy="true" aria-label="در حال بارگذاری" className="m-0 grid list-none gap-3 p-0">
+          {[0, 1, 2].map(i => (
+            <li key={i} className="h-24 rounded-card border border-line/10 bg-surface motion-safe:animate-pulse" />
+          ))}
+        </ul>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">
-          <Star size={48} className="mx-auto mb-4 text-gray-300" />
-          <p>درخواستی در این بخش وجود ندارد</p>
+        <div className="adm-card py-12 text-center">
+          <Star size={32} className="mx-auto mb-3 text-ink-3" aria-hidden />
+          <p className="m-0 text-sm text-ink-2">درخواستی در این بخش وجود ندارد</p>
         </div>
       ) : (
-        <ScrollList count={filtered.length} min={5} gap={16}>
+        <ScrollList count={filtered.length} min={5} gap={12}>
           {filtered.map(req => (
-            <div key={req.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-green-200 transition-all">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold text-lg flex-shrink-0">
-                    {req.firstName?.[0]}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-bold text-gray-800">{req.firstName} {req.lastName}</h3>
-                      <span className={`text-xs font-medium ${roleLabels[req.primaryRole]?.color || 'text-gray-600'}`}>
-                        {roleLabels[req.primaryRole]?.label || req.primaryRole}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-2">
-                      <span>📱 {req.phone}</span>
-                      {req.city && <span>📍 {req.city}</span>}
-                      <span>📅 {req.createdAt ? new Date(req.createdAt).toLocaleDateString('fa-IR') : '—'}</span>
-                    </div>
-                    {req.bio && (
-                      <p className="text-sm text-gray-600 leading-6 bg-gray-50 rounded-xl p-3">{req.bio}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <button onClick={() => router.push(`/users/${req.id}`)}
-                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors" title="مشاهده پروفایل">
-                    <Eye size={18} />
-                  </button>
-                  {activeTab !== 'verified' && (
-                    <button onClick={() => handleVerify(req.id, 'verified')}
-                      className="flex items-center gap-1.5 bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-700 transition-colors">
-                      <CheckCircle size={15} />
-                      تأیید
-                    </button>
-                  )}
-                  {activeTab !== 'rejected' && (
-                    <button onClick={() => handleVerify(req.id, 'rejected')}
-                      className="flex items-center gap-1.5 bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-600 transition-colors">
-                      <XCircle size={15} />
-                      رد
-                    </button>
-                  )}
-                </div>
+            <article key={req.id} className="adm-card flex flex-wrap items-start gap-3">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-gold/15 text-lg font-semibold text-gold-text" aria-hidden>
+                {req.firstName?.[0]}
               </div>
-            </div>
+              <div className="min-w-0 basis-48 flex-1">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <h2 className="adm-break m-0 text-sm font-semibold text-ink">{req.firstName} {req.lastName}</h2>
+                  <span className={`text-xs font-medium ${roleLabels[req.primaryRole]?.color || 'text-gray-600'}`}>
+                    {roleLabels[req.primaryRole]?.label || req.primaryRole}
+                  </span>
+                </div>
+                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-2">
+                  <span>📱 {req.phone}</span>
+                  {req.city && <span>📍 {req.city}</span>}
+                  <span>📅 {req.createdAt ? new Date(req.createdAt).toLocaleDateString('fa-IR') : '—'}</span>
+                </div>
+                {req.bio && (
+                  <p className="adm-break m-0 mt-2 rounded-field bg-paper p-3 text-sm leading-loose text-ink-2">{req.bio}</p>
+                )}
+              </div>
+
+              <div className="adm-actions basis-full justify-end md:basis-auto">
+                <button type="button" onClick={() => router.push(`/users/${req.id}`)}
+                  className="inline-flex size-11 items-center justify-center rounded-field text-ink-3 transition-colors hover:bg-blue-50 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"
+                  title="مشاهده پروفایل" aria-label={`مشاهده پروفایل ${req.firstName} ${req.lastName}`}>
+                  <Eye size={18} aria-hidden />
+                </button>
+                {activeTab !== 'verified' && (
+                  <button type="button" onClick={() => handleVerify(req.id, 'verified')}
+                    className="inline-flex h-11 items-center gap-1 rounded-field bg-green-600 px-4 text-sm font-medium text-white transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
+                    <CheckCircle size={15} aria-hidden />
+                    تأیید
+                  </button>
+                )}
+                {activeTab !== 'rejected' && (
+                  <button type="button" onClick={() => handleVerify(req.id, 'rejected')}
+                    className="inline-flex h-11 items-center gap-1 rounded-field bg-red-500 px-4 text-sm font-medium text-white transition-colors hover:bg-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
+                    <XCircle size={15} aria-hidden />
+                    رد
+                  </button>
+                )}
+              </div>
+            </article>
           ))}
         </ScrollList>
       )}
-    </div>
+    </main>
   );
 }

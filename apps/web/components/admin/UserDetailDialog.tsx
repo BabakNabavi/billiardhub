@@ -15,9 +15,8 @@ import { apiFetch } from '../../lib/http'
 import { faDate } from '../../lib/jalali'
 import { X, Loader2, BadgeCheck, ShieldAlert, Copy, Check, Pencil } from 'lucide-react'
 import { UserRolesSection } from './UserRolesSection'
+import { Button } from '../ui/Button'
 
-const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
-const GOLD_D = '#8F6531', FELT = '#0E7A38', RED = '#B23B2E'
 
 type Row = Record<string, unknown>
 
@@ -65,19 +64,17 @@ function Field({ label, value, mono, copy }: { label: string; value: unknown; mo
   const s = value === null || value === undefined || value === '' ? null : String(value)
   if (!s) return null
   return (
-    <div style={{ padding: '8px 0', borderBottom: `1px solid ${LINE}`, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-      <span style={{ fontSize: 11.5, color: MUT, fontWeight: 700, width: 108, flexShrink: 0, lineHeight: 1.9 }}>{label}</span>
-      <span className={mono ? 'bh-latin' : undefined}
-        style={{ fontSize: 12.5, color: INK, fontWeight: 600, lineHeight: 1.9, minWidth: 0, flex: 1, wordBreak: 'break-word' }}>
+    <div className="flex items-start gap-3 border-b border-line/10 py-2">
+      <span className="w-24 shrink-0 text-xs font-semibold leading-loose text-ink-2">{label}</span>
+      <span className={`adm-break min-w-0 flex-1 text-sm font-medium leading-loose text-ink ${mono ? 'bh-latin' : ''}`}>
         {s}
       </span>
       {copy && (
-        <button onClick={() => { void navigator.clipboard.writeText(s); setDone(true); setTimeout(() => setDone(false), 1400) }}
-          title="کپی" style={{
-            flexShrink: 0, width: 26, height: 26, borderRadius: 7, cursor: 'pointer',
-            border: `1px solid ${LINE}`, background: '#FAFAF7', color: done ? FELT : MUT,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>{done ? <Check size={12} /> : <Copy size={12} />}</button>
+        <button type="button" title="کپی" aria-label={`کپی ${label}`}
+          onClick={() => { void navigator.clipboard.writeText(s); setDone(true); setTimeout(() => setDone(false), 1400) }}
+          className={`inline-flex size-11 shrink-0 items-center justify-center rounded-field border border-line/10 bg-paper hover:border-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep ${done ? 'text-success' : 'text-ink-2'}`}>
+          {done ? <Check size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
+        </button>
       )}
     </div>
   )
@@ -105,18 +102,15 @@ const EDIT_FIELDS: { key: string; label: string; ltr?: boolean; hint?: string; a
 function EditRow({ f, value, onChange }: {
   f: (typeof EDIT_FIELDS)[number]; value: string; onChange: (v: string) => void
 }) {
-  const box: React.CSSProperties = {
-    width: '100%', border: `1px solid ${LINE}`, borderRadius: 9, padding: '7px 10px',
-    fontSize: 12.5, color: INK, fontWeight: 600, fontFamily: 'inherit', background: '#FEFEFC',
-    direction: f.ltr ? 'ltr' : 'rtl', textAlign: f.ltr ? 'left' : 'right',
-  }
+  const id = `edit-${f.key}`
+  const box = `w-full rounded-field border border-line/20 bg-surface px-3 py-2 text-sm font-medium text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep ${f.ltr ? 'text-start' : ''}`
   return (
-    <div style={{ padding: '7px 0', borderBottom: `1px solid ${LINE}` }}>
-      <label style={{ fontSize: 11.5, color: MUT, fontWeight: 700, display: 'block', marginBottom: 4 }}>{f.label}</label>
+    <div className="adm-field border-b border-line/10 py-2">
+      <label htmlFor={id}>{f.label}</label>
       {f.area
-        ? <textarea value={value} onChange={e => onChange(e.target.value)} rows={3} style={{ ...box, resize: 'vertical' }} />
-        : <input value={value} onChange={e => onChange(e.target.value)} style={box} />}
-      {f.hint && <div style={{ fontSize: 10.5, color: MUT, marginTop: 3 }}>{f.hint}</div>}
+        ? <textarea id={id} value={value} onChange={e => onChange(e.target.value)} rows={3} className={`${box} resize-y`} />
+        : <input id={id} value={value} onChange={e => onChange(e.target.value)} dir={f.ltr ? 'ltr' : 'rtl'} className={box} />}
+      {f.hint && <div className="text-xs text-ink-2">{f.hint}</div>}
     </div>
   )
 }
@@ -126,10 +120,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   const any = Array.isArray(children) ? children.some(Boolean) : Boolean(children)
   if (!any) return null
   return (
-    <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 12, fontWeight: 900, color: GOLD_D, marginBottom: 2 }}>{title}</div>
+    <section className="mb-4">
+      <h3 className="m-0 mb-1 text-sm font-semibold text-gold-text">{title}</h3>
       {children}
-    </div>
+    </section>
   )
 }
 
@@ -227,90 +221,68 @@ export default function UserDetailDialog({ userId, onClose, onRolesChanged }: {
   }).filter(Boolean) as { label: string; entries: [string, unknown][] }[]
 
   return (
-    <div onClick={onClose} style={{
-      position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(20,18,14,0.45)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
-    }}>
-      <div onClick={e => e.stopPropagation()} dir="rtl" style={{
-        background: '#fff', borderRadius: 18, width: 'min(600px,100%)', maxHeight: '88vh',
-        display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-base)',
-        boxShadow: '0 24px 70px rgba(28,27,23,0.22)',
-      }}>
+    <div onClick={onClose} className="adm-modal-backdrop">
+      <div onClick={e => e.stopPropagation()} role="dialog" aria-labelledby="user-detail-title"
+        className="adm-sheet [--adm-sheet-w:600px]">
         {/* سربرگ */}
-        <div style={{ padding: '15px 18px', borderBottom: `1px solid ${LINE}`, display: 'flex', alignItems: 'center', gap: 11 }}>
-          <span style={{
-            width: 42, height: 42, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16, fontWeight: 900, color: '#241B08',
-            background: 'linear-gradient(135deg,#C7A66A,#8A6020)',
-          }}>
+        <div className="flex flex-wrap items-center gap-3 border-b border-line/10 p-4">
+          <span className="inline-flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gold/20 text-base font-semibold text-gold-text" aria-hidden>
             {g('avatar')
-              ? <img src={String(g('avatar'))} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              // eslint-disable-next-line @next/next/no-img-element -- نشانیِ بیرونیِ دلخواهِ کاربر؛ بهینه‌ساز Next جا ندارد
+              ? <img src={String(g('avatar'))} alt="" loading="lazy" decoding="async" className="size-full object-cover" />
               : name.slice(0, 1)}
           </span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 15, fontWeight: 900, color: INK }}>{name}</span>
+          <div className="min-w-0 flex-1 basis-32">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 id="user-detail-title" className="adm-break m-0 text-base font-semibold text-ink">{name}</h2>
               {status === 'verified'
-                ? <BadgeCheck size={15} style={{ color: FELT }} />
-                : status === 'rejected' ? <ShieldAlert size={15} style={{ color: RED }} /> : null}
+                ? <BadgeCheck size={16} className="text-success" aria-label="تأییدشده" />
+                : status === 'rejected' ? <ShieldAlert size={16} className="text-danger" aria-label="ردشده" /> : null}
             </div>
-            <div style={{ fontSize: 11.5, color: MUT, marginTop: 2 }}>
+            <div className="mt-1 text-xs text-ink-2">
               {roles.map(r => ROLE_FA[r] ?? r).join(' · ') || '—'}
             </div>
           </div>
-          {u && !editing && (
-            <button onClick={startEdit} title="ویرایش مشخصات" style={{
-              background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
-              borderRadius: 10, height: 32, padding: '0 11px', display: 'flex', alignItems: 'center',
-              gap: 5, cursor: 'pointer', color: GOLD_D, fontSize: 12, fontWeight: 800,
-              fontFamily: 'inherit', flexShrink: 0,
-            }}><Pencil size={13} /> ویرایش</button>
-          )}
-          {saved && <span style={{ fontSize: 11.5, fontWeight: 800, color: FELT, flexShrink: 0 }}>ذخیره شد</span>}
-          <button onClick={onClose} aria-label="بستن" style={{
-            background: 'rgba(28,28,26,0.05)', border: `1px solid ${LINE}`, borderRadius: 10,
-            width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: SEC, flexShrink: 0,
-          }}><X size={16} /></button>
+          <div className="adm-actions ms-auto">
+            {saved && <span role="status" className="text-xs font-semibold text-success">ذخیره شد</span>}
+            {u && !editing && (
+              <Button size="sm" variant="primary" icon={<Pencil size={13} aria-hidden />} onClick={startEdit}
+                title="ویرایش مشخصات">
+                ویرایش
+              </Button>
+            )}
+            <button type="button" onClick={onClose} aria-label="بستن"
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-field border border-line/10 bg-line/[.05] text-ink-2 hover:bg-line/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
+              <X size={16} aria-hidden />
+            </button>
+          </div>
         </div>
 
         {/* بدنه */}
-        <div style={{ overflowY: 'auto', padding: '12px 18px 16px' }}>
-          {err && <div style={{ padding: '12px 0', color: RED, fontSize: 12.5, fontWeight: 700 }}>{err}</div>}
+        <div className="overflow-y-auto overscroll-contain px-4 pb-4 pt-3">
+          {err && <div role="alert" className="py-3 text-sm font-semibold text-danger-ink">{err}</div>}
           {!u && !err && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: SEC, fontSize: 13, padding: 20 }}>
-              <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> در حال بارگذاری…
+            <div role="status" className="flex items-center gap-2 p-5 text-sm text-ink-2">
+              <Loader2 size={16} className="motion-safe:animate-spin" aria-hidden /> در حال بارگذاری…
             </div>
           )}
 
           {u && editing && (
             <>
-              <div style={{ fontSize: 11.5, color: SEC, lineHeight: 1.9, padding: '4px 0 8px' }}>
+              <p className="m-0 pb-2 text-xs leading-loose text-ink-2">
                 شماره‌ی موبایل، نقش‌ها و وضعیت احراز از این‌جا عوض نمی‌شوند
                 هر تغییری در گزارش ممیزی ثبت می‌شود
-              </div>
+              </p>
               {EDIT_FIELDS.map(f => (
                 <EditRow key={f.key} f={f} value={form[f.key] ?? ''}
                   onChange={v => setForm(s => ({ ...s, [f.key]: v }))} />
               ))}
-              {saveErr && <div style={{ color: RED, fontSize: 12, fontWeight: 700, padding: '10px 0' }}>{saveErr}</div>}
-              <div style={{ display: 'flex', gap: 8, paddingTop: 14 }}>
-                <button onClick={() => void save()} disabled={saving} style={{
-                  flex: 1, height: 38, borderRadius: 10, cursor: saving ? 'default' : 'pointer',
-                  background: 'rgba(199,166,106,0.12)', border: '1px solid rgba(199,166,106,0.34)',
-                  color: GOLD_D, fontSize: 13, fontWeight: 800, fontFamily: 'inherit',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  opacity: saving ? 0.6 : 1,
-                }}>
-                  {saving && <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />}
-                  {saving ? 'در حال ذخیره…' : 'ذخیره‌ی تغییرات'}
-                </button>
-                <button onClick={() => { setEditing(false); setSaveErr('') }} style={{
-                  height: 38, padding: '0 16px', borderRadius: 10, cursor: 'pointer',
-                  background: '#FAFAF7', border: `1px solid ${LINE}`, color: SEC,
-                  fontSize: 13, fontWeight: 700, fontFamily: 'inherit',
-                }}>انصراف</button>
+              {saveErr && <div role="alert" className="py-3 text-sm font-semibold text-danger-ink">{saveErr}</div>}
+              <div className="adm-sticky-actions">
+                <Button size="sm" variant="secondary" onClick={() => { setEditing(false); setSaveErr('') }}>انصراف</Button>
+                <Button size="sm" variant="primary" loading={saving} loadingText="در حال ذخیره…" onClick={() => void save()}>
+                  ذخیره‌ی تغییرات
+                </Button>
               </div>
             </>
           )}
@@ -363,7 +335,7 @@ export default function UserDetailDialog({ userId, onClose, onRolesChanged }: {
 
               {g('bio') ? (
                 <Section title="درباره">
-                  <div style={{ fontSize: 12.5, color: SEC, lineHeight: 2, padding: '8px 0' }}>{String(g('bio'))}</div>
+                  <p className="adm-break m-0 py-2 text-sm leading-loose text-ink-2">{String(g('bio'))}</p>
                 </Section>
               ) : null}
 
@@ -381,9 +353,9 @@ export default function UserDetailDialog({ userId, onClose, onRolesChanged }: {
                     const url = typeof d === 'string' ? d : (d as Record<string, unknown>)?.url
                     if (!url) return null
                     return (
-                      <div key={i} style={{ padding: '7px 0', borderBottom: `1px solid ${LINE}` }}>
+                      <div key={i} className="border-b border-line/10">
                         <a href={String(url)} target="_blank" rel="noopener noreferrer"
-                          style={{ fontSize: 12.5, fontWeight: 700, color: GOLD_D, textDecoration: 'none' }}>
+                          className="inline-flex min-h-11 items-center text-sm font-semibold text-gold-text no-underline hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
                           مدرک {fa(i + 1)} — باز کردن
                         </a>
                       </div>

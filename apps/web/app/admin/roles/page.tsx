@@ -1,11 +1,12 @@
 ﻿'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
 import { ROLE_MAP, RoleValue, RoleStatus, toFarsiDigits, hexToRgba, STATUS_COLOR, STATUS_LABEL } from '@/lib/roles'
 import { csrfToken, apiFetch } from '../../../lib/http'
 import TabStrip from '../../../components/ui/TabStrip'
 import Ti from '../../../components/ui/Ti'
+import { Button } from '../../../components/ui/Button'
+import { AdminHeader } from '../../../components/admin/AdminHeader'
 import { REJECT_REASONS, rejectLabel } from '../../../lib/moderation/reasons'
 import ReviewDetails from '../../../components/admin/ReviewDetails'
 
@@ -38,8 +39,8 @@ function timeAgo(iso: string): string {
 /* ── ردیف فشرده ──
    جایگزین کارت بزرگ. با شصت درخواست، کارت ۱۶۰پیکسلی یعنی ادمین
    باید ده صفحه اسکرول کند تا یک تصمیم بگیرد. این ردیف همه‌ی چیزهای
-   لازم — نقش، مدرک، زمان، دو دکمه — را در یک خط جا می‌دهد و کادر
-   دلیل رد فقط وقتی باز می‌شود که لازم باشد. */
+   لازم — نقش، مدرک، زمان، دکمه‌ها — را فشرده جا می‌دهد: روی موبایل
+   مشخصات یک خط و دکمه‌ها خطِ بعد؛ کادر دلیل رد فقط وقتی لازم است باز می‌شود. */
 function RequestRow({ req, onAction }: {
   req: RoleRequest
   onAction: (id: string, action: 'approve' | 'reject', note?: string, verified?: boolean) => Promise<void>
@@ -65,127 +66,95 @@ function RequestRow({ req, onAction }: {
   const missingDoc = meta.requiresDoc && !req.doc_url
 
   return (
-    <div style={{ padding: '9px 14px', borderTop: '1px solid rgba(0,0,0,0.04)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
-        <Ti name={meta.icon} size={16} color={meta.color} />
-        <span style={{ fontSize: 13.5, fontWeight: 700, color: meta.color, minWidth: 78 }}>{meta.label}</span>
+    <div className="border-t border-line/10 px-4 py-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        {/* رنگِ نقش و وضعیت از داده می‌آید، پس تنها استایل‌های اینلاینِ مجاز این‌جا هستند */}
+        <span className="flex items-center gap-2 text-sm font-semibold" style={{ color: meta.color }}>
+          <Ti name={meta.icon} size={16} color={meta.color} />
+          {meta.label}
+        </span>
 
         {req.doc_url ? (
           <a href={req.doc_url} target="_blank" rel="noreferrer"
-            style={{ fontSize: 12, color: '#C7A66A', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+            className="inline-flex min-h-11 items-center gap-1 text-xs text-gold-text no-underline hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep">
             <Ti name="file" size={13} /> مدرک
           </a>
         ) : missingDoc ? (
-          <span style={{ fontSize: 11.5, color: '#B7791F' }}>
-            <Ti name="alert-triangle" size={12} style={{ marginLeft: 3 }} /> بدون مدرک
+          <span className="inline-flex items-center gap-1 text-xs text-yellow-700">
+            <Ti name="alert-triangle" size={12} /> بدون مدرک
           </span>
         ) : (
-          <span style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.3)' }}>مدرک لازم ندارد</span>
+          <span className="text-xs text-ink-3">مدرک لازم ندارد</span>
         )}
 
-        <span style={{
-          marginInlineStart: 'auto', fontSize: 11.5, color: STATUS_COLOR[req.status],
-          background: hexToRgba(STATUS_COLOR[req.status], 0.1), borderRadius: 20, padding: '2px 9px',
-        }}>
+        <span className="rounded-full px-2 py-1 text-xs ms-auto"
+          style={{ color: STATUS_COLOR[req.status], background: hexToRgba(STATUS_COLOR[req.status], 0.1) }}>
           {STATUS_LABEL[req.status]}
         </span>
-
-        {req.status === 'pending' && !rejecting && (
-          <>
-            <button onClick={() => setShowDetails(v => !v)} disabled={busy}
-              title="دیدن اطلاعات کامل پیش از تصمیم"
-              style={{
-                padding: '6px 12px', borderRadius: 9, fontSize: 12.5, fontWeight: 700,
-                fontFamily: 'inherit', cursor: 'pointer',
-                border: `1px solid ${showDetails ? 'rgba(199,166,106,0.4)' : 'rgba(0,0,0,0.1)'}`,
-                background: showDetails ? 'rgba(199,166,106,0.12)' : 'transparent',
-                color: showDetails ? '#8F6531' : 'rgba(0,0,0,0.5)',
-              }}>
-              {showDetails ? 'بستن' : 'جزئیات'}
-            </button>
-            {/* تأیید همیشه ممکن است — مدرک اجباری نیست. نبودنش فقط
-                یعنی تیک آبی داده نمی‌شود. */}
-            <button onClick={() => act('approve')} disabled={busy}
-              title="تأیید بدون تیک آبی"
-              style={{
-                padding: '6px 12px', borderRadius: 9, border: '1px solid rgba(199,166,106,0.4)',
-                fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
-                cursor: busy ? 'not-allowed' : 'pointer',
-                background: busy ? 'rgba(0,0,0,0.05)' : 'rgba(199,166,106,0.12)',
-                color: busy ? 'rgba(0,0,0,0.3)' : '#8F6531',
-              }}>
-              تأیید
-            </button>
-
-            {/* تیک آبی فقط با مدرک. بدون مدرک دکمه خاموش است تا ادمین
-                چیزی را که ندیده تأیید نکند — سرور هم همین را رد می‌کند. */}
-            <button onClick={() => act('approve', true)} disabled={busy || missingDoc}
-              title={missingDoc ? `برای تیک آبی، ${meta.docHint || 'مدرک'} لازم است` : 'تأیید همراه با تیک آبی'}
-              style={{
-                padding: '6px 12px', borderRadius: 9, border: 'none', fontSize: 12.5, fontWeight: 700,
-                fontFamily: 'inherit', cursor: (busy || missingDoc) ? 'not-allowed' : 'pointer',
-                background: (busy || missingDoc) ? 'rgba(0,0,0,0.05)' : '#1D4ED8',
-                color: (busy || missingDoc) ? 'rgba(0,0,0,0.3)' : '#fff',
-                display: 'inline-flex', alignItems: 'center', gap: 4,
-              }}>
-              <Ti name="rosette-discount-check" size={13} /> تیک آبی
-            </button>
-            <button onClick={() => setRejecting(true)}
-              style={{
-                padding: '6px 12px', borderRadius: 9, fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
-                cursor: 'pointer', border: '1px solid rgba(239,68,68,0.3)',
-                background: 'rgba(239,68,68,0.08)', color: '#ef4444',
-              }}>
-              رد
-            </button>
-          </>
-        )}
       </div>
 
+      {req.status === 'pending' && !rejecting && (
+        <div className="adm-actions mt-3">
+          <Button size="sm" variant="secondary" disabled={busy} aria-pressed={showDetails}
+            title="دیدن اطلاعات کامل پیش از تصمیم"
+            onClick={() => setShowDetails(v => !v)}>
+            {showDetails ? 'بستن' : 'جزئیات'}
+          </Button>
+          {/* تأیید همیشه ممکن است — مدرک اجباری نیست. نبودنش فقط
+              یعنی تیک آبی داده نمی‌شود. */}
+          <Button size="sm" variant="primary" loading={busy} title="تأیید بدون تیک آبی"
+            onClick={() => void act('approve')}>
+            تأیید
+          </Button>
+          {/* تیک آبی فقط با مدرک. بدون مدرک دکمه خاموش است تا ادمین
+              چیزی را که ندیده تأیید نکند — سرور هم همین را رد می‌کند. */}
+          <Button size="sm" variant="secondary" disabled={busy || missingDoc}
+            icon={<Ti name="rosette-discount-check" size={13} />}
+            className="text-[#1D4ED8]"
+            title={missingDoc ? `برای تیک آبی، ${meta.docHint || 'مدرک'} لازم است` : 'تأیید همراه با تیک آبی'}
+            onClick={() => void act('approve', true)}>
+            تیک آبی
+          </Button>
+          <Button size="sm" variant="danger-ghost" disabled={busy} onClick={() => setRejecting(true)}>
+            رد
+          </Button>
+        </div>
+      )}
+
       {showDetails && (
-        <div style={{ marginTop: 10, padding: '12px 0 2px' }}>
+        <div className="mt-3 pt-3">
           <ReviewDetails type="role" id={req.id} />
         </div>
       )}
 
       {rejecting && (
-        <div style={{ display: 'flex', gap: 7, marginTop: 8, flexWrap: 'wrap' }}>
+        <div className="adm-toolbar mt-3">
           {/* فهرست بسته، نه متن آزاد: این متن داخل پیامک می‌رود و
               سرویس پیامک مقدارهای ممکن آن را از قبل می‌خواهد. */}
-          <select value={note} onChange={e => setNote(e.target.value)}
-            style={{
-              flex: 1, minWidth: 190, background: '#F7F7F5', border: '1px solid rgba(0,0,0,0.08)',
-              borderRadius: 9, padding: '7px 11px', fontSize: 12.5, fontFamily: 'inherit', outline: 'none',
-              color: note ? '#111' : 'rgba(0,0,0,0.4)', cursor: 'pointer',
-            }}>
-            <option value="">دلیل رد را انتخاب کنید…</option>
-            {REJECT_REASONS.map(r => (
-              <option key={r.code} value={r.code}>{r.label}</option>
-            ))}
-          </select>
-          <button onClick={() => act('reject')} disabled={busy || !note}
-            style={{
-              padding: '7px 13px', borderRadius: 9, border: 'none',
-              background: busy || !note ? 'rgba(0,0,0,0.12)' : '#ef4444',
-              color: busy || !note ? 'rgba(0,0,0,0.35)' : '#fff',
-              fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
-              cursor: busy || !note ? 'not-allowed' : 'pointer',
-            }}>
+          <label className="flex-1 basis-48">
+            <span className="sr-only">دلیل رد</span>
+            <select value={note} onChange={e => setNote(e.target.value)} className="h-11 w-full">
+              <option value="">دلیل رد را انتخاب کنید…</option>
+              {REJECT_REASONS.map(r => (
+                <option key={r.code} value={r.code}>{r.label}</option>
+              ))}
+            </select>
+          </label>
+          <Button size="sm" variant="danger" loading={busy} disabled={!note} onClick={() => void act('reject')}>
             تأیید رد
-          </button>
-          <button onClick={() => setRejecting(false)}
-            style={{ padding: '7px 13px', borderRadius: 9, border: '1px solid rgba(0,0,0,0.08)', background: 'transparent', color: 'rgba(0,0,0,0.45)', fontSize: 12.5, fontFamily: 'inherit', cursor: 'pointer' }}>
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => setRejecting(false)}>
             انصراف
-          </button>
+          </Button>
         </div>
       )}
 
       {/* در ردیف‌های تازه کد دلیل ذخیره می‌شود، در ردیف‌های قدیمی
           متن آزاد. `rejectLabel` هر دو را می‌فهمد. */}
       {req.status === 'rejected' && req.rejection_note && (
-        <div style={{ fontSize: 12, color: '#ef4444', marginTop: 6 }}>
+        <p className="m-0 mt-2 text-xs text-danger-ink">
           دلیل: {rejectLabel(req.rejection_note)}
-        </div>
+        </p>
       )}
     </div>
   )
@@ -193,7 +162,6 @@ function RequestRow({ req, onAction }: {
 
 // ─── Page ─────────────────────────────────────────────────────
 export default function AdminRolesPage() {
-  const router = useRouter()
   const [requests, setRequests] = useState<RoleRequest[]>([])
 
   /* درخواست‌های یک کاربر کنار هم — بیست نفر با سه نقش یعنی شصت
@@ -269,103 +237,72 @@ export default function AdminRolesPage() {
   ]
 
   return (
-    <>      <div style={{
-        minHeight: '100vh', background: '#F7F7F5',
-        fontFamily: 'Vazirmatn, Tahoma, sans-serif', direction: 'rtl',
-        position: 'relative',
-      }}>
-        <div style={{ position: 'fixed', width: 300, height: 300, background: 'radial-gradient(circle, rgba(199,166,106,0.12) 0%, transparent 70%)', top: -80, right: -60, filter: 'blur(50px)', zIndex: 0, pointerEvents: 'none' }} />
+    <main className="adm-page">
+      <AdminHeader title="مدیریت درخواست نقش" />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 560, margin: '0 auto', padding: '28px 16px 80px' }}>
+      <TabStrip value={filter} onChange={(v: string) => setFilter(v as RoleStatus)} style={{ marginBottom: 0 }}
+        tabs={tabs.map(t => ({
+          key: t.status, label: t.label,
+          fg: STATUS_COLOR[t.status], bg: hexToRgba(STATUS_COLOR[t.status], 0.1),
+        }))} />
 
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-            <button aria-label="بازگشت" onClick={() => router.push('/dashboard')} style={{
-              background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)',
-              borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'rgba(0,0,0,0.50)',
-            }}>
-              <Ti name="arrow-right" size={20} />
-            </button>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: '#111111' }}>مدیریت درخواست نقش</div>
-              <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>پانل ادمین</div>
-            </div>
-          </div>
-
-          {/* Filter tabs */}
-          <TabStrip value={filter} onChange={(v: string) => setFilter(v as RoleStatus)}
-            tabs={tabs.map(t => ({
-              key: t.status, label: t.label,
-              fg: STATUS_COLOR[t.status], bg: hexToRgba(STATUS_COLOR[t.status], 0.1),
-            }))} />
-
-          {/* سرویس در دسترس نیست */}
-          {svcDown && !loading && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(178,59,46,0.06)', border: '1px solid rgba(178,59,46,0.22)', borderRadius: 12, padding: '12px 16px', marginBottom: 14, fontSize: 13, color: '#A03428' }}>
-              سرویس درخواست‌های نقش فعلا در دسترس نیست — بعدا دوباره تلاش کنید، (تأیید/لغو نقش‌ها به بک‌اند متصل است)
-            </div>
-          )}
-
-          {/* List */}
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(0,0,0,0.38)', fontSize: 15 }}>
-              در حال بارگذاری...
-            </div>
-          ) : requests.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 0' }}>
-              <Ti name="inbox" size={40} color={'#1e293b'} style={{ display: 'block', marginBottom: 12 }} />
-              <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.38)' }}>درخواستی وجود ندارد</span>
-            </div>
-          ) : (
-            <>
-              {/* ── گروه‌بندی بر اساس کاربر ──
-                  با کارت‌های بزرگ، بیست نفر که هرکدام سه نقش خواسته‌اند
-                  یعنی شصت کارت هم‌شکل پشت هم — ادمین نمی‌فهمد کدام
-                  درخواست‌ها مال یک نفرند و باید با هم بررسی شوند.
-
-                  حالا هر کاربر یک بلوک است و نقش‌هایش زیرش، فشرده. */}
-              <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', marginBottom: 12 }}>
-                {toFarsiDigits(requests.length)} درخواست از {toFarsiDigits(grouped.length)} کاربر
-              </div>
-              {grouped.map(g => (
-                <div key={g.key} style={{
-                  background: '#fff', border: '1px solid rgba(0,0,0,0.07)',
-                  borderRadius: 14, marginBottom: 10, overflow: 'hidden',
-                }}>
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
-                    padding: '10px 14px', background: '#F7F7F5',
-                    borderBottom: '1px solid rgba(0,0,0,0.05)',
-                  }}>
-                    <Ti name="user" size={15} color="rgba(0,0,0,0.45)" />
-                    <span style={{ fontSize: 14, fontWeight: 800, color: '#111' }}>{g.name}</span>
-                    <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)' }}>
-                      {toFarsiDigits(g.items.length)} نقش · {timeAgo(g.items[0]!.requested_at)}
-                    </span>
-                  </div>
-                  <div>
-                    {g.items.map(r => (
-                      <RequestRow key={r.id} req={r} onAction={handleAction} />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
+      {/* سرویس در دسترس نیست */}
+      {svcDown && !loading && (
+        <div role="alert" className="rounded-card border border-danger/30 bg-danger/5 px-4 py-3 text-sm leading-loose text-danger-ink">
+          سرویس درخواست‌های نقش فعلا در دسترس نیست — بعدا دوباره تلاش کنید، (تأیید/لغو نقش‌ها به بک‌اند متصل است)
         </div>
+      )}
 
-        {toast && (
-          <div style={{
-            position: 'fixed', bottom: `calc(32px + env(safe-area-inset-bottom))`, left: '50%', transform: 'translateX(-50%)',
-            background: '#C7A66A', color: '#FFFFFF', fontSize: 14, fontWeight: 700,
-            fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '10px 24px',
-            borderRadius: 24, zIndex: 100, whiteSpace: 'nowrap',
-          }}>
-            ✓ {toast}
+      {/* List */}
+      {loading ? (
+        <ul aria-busy="true" aria-label="در حال بارگذاری" className="m-0 grid list-none gap-3 p-0">
+          {[0, 1, 2].map(i => (
+            <li key={i} className="h-24 rounded-card border border-line/10 bg-surface motion-safe:animate-pulse" />
+          ))}
+        </ul>
+      ) : requests.length === 0 ? (
+        <div className="adm-card py-12 text-center">
+          <Ti name="inbox" size={40} color="#1e293b" style={{ display: 'block', margin: '0 auto 12px' }} />
+          <p className="m-0 text-sm text-ink-2">درخواستی وجود ندارد</p>
+        </div>
+      ) : (
+        <>
+          {/* ── گروه‌بندی بر اساس کاربر ──
+              با کارت‌های بزرگ، بیست نفر که هرکدام سه نقش خواسته‌اند
+              یعنی شصت کارت هم‌شکل پشت هم — ادمین نمی‌فهمد کدام
+              درخواست‌ها مال یک نفرند و باید با هم بررسی شوند.
+
+              حالا هر کاربر یک بلوک است و نقش‌هایش زیرش، فشرده. */}
+          <p className="m-0 text-xs text-ink-2">
+            {toFarsiDigits(requests.length)} درخواست از {toFarsiDigits(grouped.length)} کاربر
+          </p>
+          <div className="grid gap-3">
+            {grouped.map(g => (
+              <section key={g.key} aria-label={g.name} className="overflow-hidden rounded-card border border-line/10 bg-surface">
+                <div className="flex flex-wrap items-center gap-2 bg-paper px-4 py-3">
+                  <Ti name="user" size={15} color="rgba(0,0,0,0.45)" />
+                  <h2 className="adm-break m-0 text-sm font-semibold text-ink">{g.name}</h2>
+                  <span className="text-xs text-ink-2">
+                    {toFarsiDigits(g.items.length)} نقش · {timeAgo(g.items[0]!.requested_at)}
+                  </span>
+                </div>
+                <div>
+                  {g.items.map(r => (
+                    <RequestRow key={r.id} req={r} onAction={handleAction} />
+                  ))}
+                </div>
+              </section>
+            ))}
           </div>
-        )}
-      </div>
-    </>
+        </>
+      )}
+
+      {toast && (
+        <div role="status"
+          className="fixed inset-x-0 bottom-[calc(32px+env(safe-area-inset-bottom))] z-[100] mx-auto w-fit max-w-[calc(100%-32px)] rounded-full bg-gold-deep px-6 py-3 text-sm font-semibold text-white">
+          ✓ {toast}
+        </div>
+      )}
+    </main>
   )
 }

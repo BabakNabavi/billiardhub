@@ -4,9 +4,11 @@ import { apiFetch } from '../../../lib/http'
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth.store';
-import { LifeBuoy, Unlock, Check, X, Loader2, MapPin, CreditCard, Send } from 'lucide-react';
+import { LifeBuoy, Unlock, Check, X, MapPin, CreditCard, Send } from 'lucide-react';
 import TabStrip from '../../../components/ui/TabStrip';
 import ScrollList from '../../../components/ui/ScrollList';
+import { Button } from '../../../components/ui/Button';
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 
 /* تیکت‌های پشتیبانی.
 
@@ -19,9 +21,6 @@ import ScrollList from '../../../components/ui/ScrollList';
    یک بار دیگر استعلام می‌گیرد. اگر ادمین شماره کارت را دستی می‌نوشت،
    یک حساب استعلام‌نشده زیر عنوان «تأییدشده» می‌نشست. */
 
-const GOLD = '#C7A66A';
-const DARK = '#141210';
-
 interface Ticket {
   id: string; user_id: string | null; club_id: string | null;
   name: string; email: string | null; phone: string | null;
@@ -31,6 +30,7 @@ interface Ticket {
 interface LockUser { id: string; bank_card: string | null; bank_card_verified: boolean }
 interface LockClub { id: string; name: string; postalCode: string | null; postalCodeVerified: boolean; ibanVerified: boolean }
 
+/* رنگِ نشانِ وضعیت داده‌ی داینامیک است (از همین جدول، هم برای تب و هم نشان) */
 const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
   open:        { label: 'باز',        bg: 'rgba(199,166,106,0.14)', fg: '#A07840' },
   in_progress: { label: 'در حال بررسی', bg: 'rgba(29,78,216,0.10)',  fg: '#1D4ED8' },
@@ -106,169 +106,142 @@ export default function AdminSupportPage() {
   const shown = tickets.filter(t => t.status === tab);
   const count = (s: string) => tickets.filter(t => t.status === s).length;
 
-  const card: React.CSSProperties = {
-    background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16,
-    padding: 18, marginBottom: 12,
-  };
-
   return (
-    <div dir="rtl" style={{ fontFamily: 'Vazirmatn, Tahoma, sans-serif', padding: '24px 16px', maxWidth: 980, margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-        <LifeBuoy size={22} color={GOLD} />
-        <h1 style={{ fontSize: 20, fontWeight: 900, color: DARK, margin: 0 }}>تیکت‌های پشتیبانی</h1>
-      </div>
-      <p style={{ fontSize: 12.5, color: '#6B7280', lineHeight: 2, marginTop: 0, marginBottom: 18 }}>
-        کد پستی و اطلاعات بانکی پس از استعلام موفق قفل می‌شوند، با «باز کردن قفل»،
-        کاربر می‌تواند یک بار دیگر استعلام بگیرد — مقدار را خودتان وارد نکنید تا
-        استعلام واقعا انجام شود
-      </p>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<LifeBuoy size={26} className="text-gold-text" aria-hidden />}
+        title="تیکت‌های پشتیبانی"
+        description="کد پستی و اطلاعات بانکی پس از استعلام موفق قفل می‌شوند، با «باز کردن قفل»، کاربر می‌تواند یک بار دیگر استعلام بگیرد — مقدار را خودتان وارد نکنید تا استعلام واقعا انجام شود" />
 
-<TabStrip value={tab} onChange={setTab}
+      <TabStrip value={tab} onChange={setTab} style={{ marginBottom: 0 }}
         tabs={Object.entries(STATUS).map(([k, v]) => ({
           key: k, label: v.label, count: count(k), fg: v.fg, bg: v.bg,
         }))} />
 
       {err && (
-        <div style={{ padding: '11px 14px', borderRadius: 12, background: 'rgba(178,59,46,0.07)', border: '1px solid rgba(178,59,46,0.22)', color: '#B23B2E', fontSize: 12.5, fontWeight: 700, marginBottom: 14, lineHeight: 1.9 }}>
+        <div role="alert" className="rounded-card border border-danger/30 bg-danger/5 px-4 py-3 text-sm font-semibold leading-loose text-danger-ink">
           {err}
         </div>
       )}
 
       {loading ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#6B7280', fontSize: 13 }}>
-          <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> در حال بارگذاری…
-        </div>
+        <ul aria-busy="true" aria-label="در حال بارگذاری" className="m-0 grid list-none gap-3 p-0">
+          {[0, 1, 2].map(i => (
+            <li key={i} className="h-32 rounded-card border border-line/10 bg-surface motion-safe:animate-pulse" />
+          ))}
+        </ul>
       ) : shown.length === 0 ? (
-        <div style={{ ...card, textAlign: 'center', color: '#9CA3AF', fontSize: 13 }}>
+        <div className="adm-card py-12 text-center text-sm text-ink-2">
           تیکتی در این وضعیت نیست
         </div>
       ) : (
-        <ScrollList count={shown.length} min={4}>
-        {shown.map(t => {
-        const club = clubs.find(c => c.id === t.club_id);
-        const owner = users.find(u => u.id === t.user_id);
-        const isPostal = t.subject === POSTAL_SUBJECT;
-        const isBank = t.subject === BANK_SUBJECT;
-        /* دکمه‌ی بازکردن فقط وقتی معنی دارد که چیزی قفل باشد */
-        const postalLocked = !!club?.postalCodeVerified;
-        const bankLocked = !!owner?.bank_card_verified || !!club?.ibanVerified;
+        <ScrollList count={shown.length} min={4} gap={12}>
+          {shown.map(t => {
+            const club = clubs.find(c => c.id === t.club_id);
+            const owner = users.find(u => u.id === t.user_id);
+            const isPostal = t.subject === POSTAL_SUBJECT;
+            const isBank = t.subject === BANK_SUBJECT;
+            /* دکمه‌ی بازکردن فقط وقتی معنی دارد که چیزی قفل باشد */
+            const postalLocked = !!club?.postalCodeVerified;
+            const bankLocked = !!owner?.bank_card_verified || !!club?.ibanVerified;
+            const draft = (reply[t.id] ?? '').trim();
+            const canReply = busy !== t.id && !!draft && (reply[t.id] ?? '') !== (t.admin_note ?? '');
 
-        return (
-          <div key={t.id} style={card}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-              <span style={{
-                padding: '3px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 800,
-                background: STATUS[t.status]?.bg, color: STATUS[t.status]?.fg,
-              }}>{STATUS[t.status]?.label ?? t.status}</span>
-              <span style={{ fontSize: 13.5, fontWeight: 800, color: DARK }}>{t.subject}</span>
-              <span style={{ marginRight: 'auto', fontSize: 11.5, color: '#9CA3AF' }}>{faDate(t.created_at)}</span>
-            </div>
+            return (
+              <article key={t.id} className="adm-card grid gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full px-3 py-1 text-xs font-semibold"
+                    style={{ background: STATUS[t.status]?.bg, color: STATUS[t.status]?.fg }}>
+                    {STATUS[t.status]?.label ?? t.status}
+                  </span>
+                  <h2 className="adm-break m-0 min-w-0 flex-1 basis-40 text-sm font-semibold text-ink">{t.subject}</h2>
+                  <span className="text-xs text-ink-2">{faDate(t.created_at)}</span>
+                </div>
 
-            <div style={{ fontSize: 12.5, color: '#4B5563', lineHeight: 2, marginBottom: 10 }}>
-              <div><b>{t.name}</b>{t.phone ? ` — ${t.phone}` : ''}{t.email ? ` — ${t.email}` : ''}</div>
-              {club && <div>باشگاه: <b>{club.name}</b>{club.postalCode ? ` — کد پستی ${club.postalCode}` : ''}</div>}
-            </div>
+                <div className="adm-break text-sm leading-loose text-ink-2">
+                  <div><b>{t.name}</b>{t.phone ? ` — ${t.phone}` : ''}{t.email ? ` — ${t.email}` : ''}</div>
+                  {club && <div>باشگاه: <b>{club.name}</b>{club.postalCode ? ` — کد پستی ${club.postalCode}` : ''}</div>}
+                </div>
 
-            <div style={{ fontSize: 13, color: DARK, lineHeight: 2, background: '#F9FAFB', border: '1px solid rgba(0,0,0,0.05)', borderRadius: 10, padding: '10px 12px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', marginBottom: 12 }}>
-              {t.message}
-            </div>
+                <div className="adm-break whitespace-pre-wrap rounded-field border border-line/10 bg-paper p-3 text-sm leading-loose text-ink">
+                  {t.message}
+                </div>
 
-            {/* ── پاسخ به کاربر ──
-                ستون `admin_note` از روز اول در جدول بود و مسیر PATCH هم
-                می‌پذیرفتش، ولی هیچ کادری برای نوشتنش وجود نداشت — یعنی
-                تیکت یک صندوق یک‌طرفه بود: کاربر می‌نوشت و هیچ‌وقت جوابی
-                نمی‌گرفت.
+                {/* ── پاسخ به کاربر ──
+                    ستون `admin_note` از روز اول در جدول بود و مسیر PATCH هم
+                    می‌پذیرفتش، ولی هیچ کادری برای نوشتنش وجود نداشت — یعنی
+                    تیکت یک صندوق یک‌طرفه بود: کاربر می‌نوشت و هیچ‌وقت جوابی
+                    نمی‌گرفت.
 
-                پاسخ در «تیکت‌های من» به کاربر نشان داده می‌شود. پیامک
-                ممکن نیست (خط خدماتی متن آزاد نمی‌پذیرد) و ایمیل هم در
-                پروژه تنظیم نشده. */}
-            <div style={{ marginBottom: 12 }}>
-              <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#6B7280', marginBottom: 5 }}>
-                پاسخ به کاربر {t.admin_note ? '— قبلا پاسخ داده شده' : ''}
-              </label>
-              <textarea
-                value={reply[t.id] ?? t.admin_note ?? ''}
-                onChange={e => setReply(p => ({ ...p, [t.id]: e.target.value }))}
-                rows={2}
-                placeholder="پاسخی که کاربر در «تیکت‌های من» می‌بیند…"
-                style={{
-                  width: '100%', boxSizing: 'border-box', resize: 'vertical',
-                  border: '1px solid rgba(0,0,0,0.14)', borderRadius: 10, padding: '9px 12px',
-                  fontSize: 13, lineHeight: 2, fontFamily: 'inherit', color: DARK,
-                  background: '#fff', outline: 'none',
-                }}
-              />
-              <div style={{ display: 'flex', gap: 8, marginTop: 7, flexWrap: 'wrap' }}>
-                <button
-                  disabled={busy === t.id || !(reply[t.id] ?? t.admin_note ?? '').trim()
-                    || (reply[t.id] ?? '') === (t.admin_note ?? '')}
-                  onClick={() => act(t.id, { adminNote: (reply[t.id] ?? '').trim() })}
-                  style={{
-                    ...btn(busy !== t.id && !!(reply[t.id] ?? '').trim() && reply[t.id] !== t.admin_note),
-                    background: 'rgba(199,166,106,0.14)', border: `1px solid ${GOLD}66`, color: '#A07840',
-                  }}>
-                  <Send size={13} /> ثبت پاسخ
-                </button>
-                {/* پاسخ‌دادن معمولا یعنی کار تمام شده — یک کلیک به‌جای دو تا */}
-                <button
-                  disabled={busy === t.id || !(reply[t.id] ?? '').trim()}
-                  onClick={() => act(t.id, { adminNote: (reply[t.id] ?? '').trim(), status: 'resolved' })}
-                  style={btn(busy !== t.id && !!(reply[t.id] ?? '').trim())}>
-                  <Check size={13} /> پاسخ و بستن تیکت
-                </button>
-              </div>
-            </div>
+                    پاسخ در «تیکت‌های من» به کاربر نشان داده می‌شود. پیامک
+                    ممکن نیست (خط خدماتی متن آزاد نمی‌پذیرد) و ایمیل هم در
+                    پروژه تنظیم نشده. */}
+                <div className="adm-field">
+                  <label htmlFor={`reply-${t.id}`}>
+                    پاسخ به کاربر {t.admin_note ? '— قبلا پاسخ داده شده' : ''}
+                  </label>
+                  <textarea id={`reply-${t.id}`}
+                    value={reply[t.id] ?? t.admin_note ?? ''}
+                    onChange={e => setReply(p => ({ ...p, [t.id]: e.target.value }))}
+                    rows={2}
+                    placeholder="پاسخی که کاربر در «تیکت‌های من» می‌بیند…"
+                    className="w-full resize-y rounded-field border border-line/20 bg-surface p-3 text-sm leading-loose text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep" />
+                  <div className="adm-actions">
+                    <Button size="sm" variant="primary" icon={<Send size={13} aria-hidden />}
+                      disabled={!canReply}
+                      onClick={() => act(t.id, { adminNote: draft })}>
+                      ثبت پاسخ
+                    </Button>
+                    {/* پاسخ‌دادن معمولا یعنی کار تمام شده — یک کلیک به‌جای دو تا */}
+                    <Button size="sm" variant="secondary" icon={<Check size={13} aria-hidden />}
+                      disabled={busy === t.id || !draft}
+                      onClick={() => act(t.id, { adminNote: draft, status: 'resolved' })}>
+                      پاسخ و بستن تیکت
+                    </Button>
+                  </div>
+                </div>
 
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {isPostal && (
-                <button disabled={busy === t.id || !postalLocked || !t.club_id}
-                  onClick={() => act(t.id, { unlock: 'postal' })}
-                  title={!t.club_id ? 'این تیکت به باشگاهی وصل نیست' : postalLocked ? '' : 'کد پستی الان قفل نیست'}
-                  style={btn(postalLocked && !!t.club_id && busy !== t.id)}>
-                  <MapPin size={13} /> باز کردن قفل کد پستی
-                </button>
-              )}
-              {isBank && (
-                <button disabled={busy === t.id || !bankLocked || !t.user_id}
-                  onClick={() => act(t.id, { unlock: 'bank' })}
-                  title={!t.user_id ? 'این تیکت به کاربری وصل نیست' : bankLocked ? '' : 'اطلاعات بانکی الان قفل نیست'}
-                  style={btn(bankLocked && !!t.user_id && busy !== t.id)}>
-                  <CreditCard size={13} /> باز کردن قفل اطلاعات بانکی
-                </button>
-              )}
-              {t.status !== 'resolved' && (
-                <button disabled={busy === t.id} onClick={() => act(t.id, { status: 'resolved' })} style={btn(busy !== t.id)}>
-                  <Check size={13} /> رسیدگی شد
-                </button>
-              )}
-              {t.status !== 'in_progress' && t.status !== 'resolved' && (
-                <button disabled={busy === t.id} onClick={() => act(t.id, { status: 'in_progress' })} style={btn(busy !== t.id)}>
-                  <Unlock size={13} /> در حال بررسی
-                </button>
-              )}
-              {t.status !== 'rejected' && (
-                <button disabled={busy === t.id} onClick={() => act(t.id, { status: 'rejected' })} style={btn(busy !== t.id, true)}>
-                  <X size={13} /> رد
-                </button>
-              )}
-            </div>
-          </div>
-        );
-        })}
+                <div className="adm-actions">
+                  {isPostal && (
+                    <Button size="sm" variant="secondary" icon={<MapPin size={13} aria-hidden />}
+                      disabled={busy === t.id || !postalLocked || !t.club_id}
+                      onClick={() => act(t.id, { unlock: 'postal' })}
+                      title={!t.club_id ? 'این تیکت به باشگاهی وصل نیست' : postalLocked ? '' : 'کد پستی الان قفل نیست'}>
+                      باز کردن قفل کد پستی
+                    </Button>
+                  )}
+                  {isBank && (
+                    <Button size="sm" variant="secondary" icon={<CreditCard size={13} aria-hidden />}
+                      disabled={busy === t.id || !bankLocked || !t.user_id}
+                      onClick={() => act(t.id, { unlock: 'bank' })}
+                      title={!t.user_id ? 'این تیکت به کاربری وصل نیست' : bankLocked ? '' : 'اطلاعات بانکی الان قفل نیست'}>
+                      باز کردن قفل اطلاعات بانکی
+                    </Button>
+                  )}
+                  {t.status !== 'resolved' && (
+                    <Button size="sm" variant="secondary" icon={<Check size={13} aria-hidden />}
+                      disabled={busy === t.id} onClick={() => act(t.id, { status: 'resolved' })}>
+                      رسیدگی شد
+                    </Button>
+                  )}
+                  {t.status !== 'in_progress' && t.status !== 'resolved' && (
+                    <Button size="sm" variant="secondary" icon={<Unlock size={13} aria-hidden />}
+                      disabled={busy === t.id} onClick={() => act(t.id, { status: 'in_progress' })}>
+                      در حال بررسی
+                    </Button>
+                  )}
+                  {t.status !== 'rejected' && (
+                    <Button size="sm" variant="danger-ghost" icon={<X size={13} aria-hidden />}
+                      disabled={busy === t.id} onClick={() => act(t.id, { status: 'rejected' })}>
+                      رد
+                    </Button>
+                  )}
+                </div>
+              </article>
+            );
+          })}
         </ScrollList>
       )}
-    </div>
+    </main>
   );
-}
-
-function btn(enabled: boolean, danger = false): React.CSSProperties {
-  return {
-    display: 'inline-flex', alignItems: 'center', gap: 6,
-    padding: '7px 13px', borderRadius: 9, fontSize: 12, fontWeight: 700,
-    fontFamily: 'inherit', cursor: enabled ? 'pointer' : 'not-allowed',
-    opacity: enabled ? 1 : 0.45,
-    background: danger ? 'rgba(239,68,68,0.08)' : '#fff',
-    border: `1px solid ${danger ? 'rgba(239,68,68,0.3)' : 'rgba(0,0,0,0.14)'}`,
-    color: danger ? '#dc2626' : '#4B5563',
-  };
 }

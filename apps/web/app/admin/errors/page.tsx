@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { AlertTriangle, Check, Loader2, RefreshCw, Server, Monitor } from 'lucide-react'
 import { apiFetch } from '../../../lib/http'
 import { toFaDigits } from '../../../lib/jalali'
+import { AdminHeader } from '../../../components/admin/AdminHeader'
 
 interface Row {
   id: number
@@ -24,10 +25,10 @@ interface Row {
   resolved: boolean
 }
 
-const CARD = 'rounded-2xl border border-[#E7E2D6] bg-white shadow-[0_2px_10px_rgba(28,27,23,0.05)]'
+const CARD = 'rounded-card border border-line/15 bg-surface shadow-e1'
 /* حلقه‌ی فوکوس یک‌جا — قاعده‌ی پروژه می‌گوید روی *همه‌ی* المان‌های
    تعاملی، و سه جا تکرار شده بود. */
-const RING = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C7A66A]'
+const RING = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep'
 
 /* «۳ دقیقه پیش» — عددِ خام تاریخ برای تشخیصِ «الان دارد می‌افتد یا
    هفته‌ی پیش بود» بی‌فایده است. */
@@ -100,31 +101,27 @@ export default function AdminErrorsPage() {
   }
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#F7F5F0] pb-24 text-[#1C1B17]">
-      <div className="mx-auto max-w-[1100px] px-4 pt-6 sm:px-6">
-
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-[19px] font-bold">ژورنال خطا</h1>
-            <p className="mt-1 text-[12.5px] text-[#6F6A5C]">
-              خطاهای سرور و مرورگر، تجمیع‌شده بر اساس نوع، هر ردیف یک باگ است، نه یک رخداد
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => setOpenOnly(v => !v)}
-              className={`rounded-[10px] border border-[#E7E2D6] bg-white px-4 py-3 text-[13px] font-bold text-[#5B564B] transition hover:border-[#C7A66A] ${RING}`}>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<AlertTriangle size={26} className="text-gold-text" aria-hidden />}
+        title="ژورنال خطا"
+        description="خطاهای سرور و مرورگر، تجمیع‌شده بر اساس نوع، هر ردیف یک باگ است، نه یک رخداد"
+        actions={
+          <>
+            <button type="button" onClick={() => setOpenOnly(v => !v)} aria-pressed={openOnly}
+              className={`inline-flex h-11 items-center rounded-field border border-line/20 bg-surface px-4 text-sm font-semibold text-ink-2 transition hover:border-gold ${RING}`}>
               {openOnly ? 'فقط رسیدگی‌نشده‌ها' : 'همه'}
             </button>
             <button type="button" onClick={() => void load()} disabled={loading}
               aria-label="تازه‌سازی"
-              className={`rounded-[10px] border border-[rgba(199,166,106,0.34)] bg-[rgba(199,166,106,0.12)] p-3 text-[#8F6531] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 ${RING}`}>
-              <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+              className={`inline-flex size-11 items-center justify-center rounded-field border border-gold/35 bg-gold/10 text-gold-text transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 ${RING}`}>
+              <RefreshCw size={15} className={loading ? 'animate-spin' : ''} aria-hidden />
             </button>
-          </div>
-        </div>
+          </>
+        } />
 
         {pending && (
-          <div className={`${CARD} mb-4 p-4 text-[13px] text-[#8F6531]`}>
+          <div className={`${CARD} p-4 text-sm text-gold-text`}>
             جدول ژورنال هنوز ساخته نشده — مهاجرت ۰۹۸ اجرا نشده است
           </div>
         )}
@@ -168,7 +165,7 @@ export default function AdminErrorsPage() {
                     {r.source === 'server' ? <Server size={15} /> : <Monitor size={15} />}
                   </span>
 
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 basis-48 flex-1">
                     <p className="break-words text-[13.5px] font-bold leading-relaxed">{r.message}</p>
                     <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-[#6F6A5C]">
                       <span className="font-bold text-[#B23B2E]">
@@ -183,7 +180,7 @@ export default function AdminErrorsPage() {
                     )}
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-2">
+                  <div className="adm-actions ms-auto shrink-0">
                     {(
                       <button type="button" onClick={() => void toggleStack(r.id)}
                         aria-expanded={expanded === r.id}
@@ -211,12 +208,11 @@ export default function AdminErrorsPage() {
         )}
 
         {!loading && !err && rows.length > 0 && (
-          <p className="mt-4 flex items-center justify-center gap-2 text-[11.5px] text-[#6F6A5C]">
+          <p className="m-0 flex items-center justify-center gap-2 text-xs text-ink-2">
             <AlertTriangle size={13} aria-hidden />
             پرتکرارترین‌ها را اول ببین؛ عدد «بار» یعنی چند کاربر به آن خورده‌اند
           </p>
         )}
-      </div>
-    </div>
+    </main>
   )
 }

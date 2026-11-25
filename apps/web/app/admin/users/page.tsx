@@ -7,6 +7,7 @@ import ScrollList from '../../../components/ui/ScrollList';
 import { apiFetch } from '../../../lib/http';
 import { Users, Search, CheckCircle, XCircle, Eye, Shield } from 'lucide-react';
 import UserDetailDialog from '../../../components/admin/UserDetailDialog';
+import { AdminHeader } from '../../../components/admin/AdminHeader';
 import { RowAction, ROW_ACTIONS_CLASS, ROW_ACTIONS_HEAD_CLASS } from '../../../components/admin/RowAction';
 
 interface User {
@@ -106,56 +107,55 @@ export default function AdminUsersPage() {
   if (!user || user.primaryRole !== 'admin') return null;
 
   return (
-    <div className="max-w-6xl mx-auto pb-10">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <Users size={24} className="text-blue-600" />
-          مدیریت کاربران
-        </h1>
-        <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">
-          {filtered.length.toLocaleString('fa-IR')} کاربر
-        </span>
-      </div>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Users size={26} className="text-gold-text" aria-hidden />}
+        title="مدیریت کاربران"
+        description={`${filtered.length.toLocaleString("fa-IR")} کاربر`} />
 
       {/* خطا هرگز نباید بی‌صدا بماند — همین بی‌صدایی بود که ۴۰۴ را
           ماه‌ها پنهان کرد و صفحه فقط «کاربری پیدا نشد» نشان می‌داد. */}
       {err && (
-        <div className="mb-5 rounded-xl border px-4 py-3 text-sm font-bold"
-          style={{ background: 'rgba(178,59,46,0.06)', borderColor: 'rgba(178,59,46,0.28)', color: '#B23B2E' }}>
+        <div role="alert" className="rounded-card border border-danger/30 bg-danger/5 px-4 py-3 text-sm font-semibold text-danger-ink">
           {err}
         </div>
       )}
 
-      {/* فیلترها */}
-      <div className="bg-white rounded-2xl shadow-sm p-5 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search size={16} className="absolute right-3 top-3 text-gray-400" />
-            <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="جستجو نام یا شماره..."
-              className="w-full border border-gray-200 rounded-xl pr-9 pl-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+      {/* فیلترها: روی موبایل جست‌وجو یک ردیف، و دو فیلتر کنارِ هم در ردیفِ بعد */}
+      <div className="adm-card">
+        <div className="adm-toolbar">
+          <div className="adm-grow relative">
+            <label htmlFor="users-q" className="sr-only">جست‌وجوی نام یا شماره</label>
+            <Search size={16} aria-hidden className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-ink-3" />
+            <input id="users-q" type="search" value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="جست‌وجوی نام یا شماره…"
+              className="h-11 w-full rounded-field border border-line/20 bg-surface pe-3 ps-9 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep" />
           </div>
-          <select value={filterRole} onChange={e => setFilterRole(e.target.value)}
-            className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
-            <option value="all">همه نقش‌ها</option>
-            {Object.entries(roleLabels).map(([k, v]) => (
-              <option key={k} value={k}>{v}</option>
-            ))}
-          </select>
-          <select value={filterVerification} onChange={e => setFilterVerification(e.target.value)}
-            className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
-            <option value="all">همه وضعیت‌ها</option>
-            <option value="unverified">تأیید نشده</option>
-            <option value="pending">در انتظار</option>
-            <option value="verified">تأیید شده</option>
-            <option value="rejected">رد شده</option>
-          </select>
+          <label className="flex-1 basis-36">
+            <span className="sr-only">فیلتر نقش</span>
+            <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className="h-11 w-full">
+              <option value="all">همه نقش‌ها</option>
+              {Object.entries(roleLabels).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex-1 basis-36">
+            <span className="sr-only">فیلتر وضعیت تأیید</span>
+            <select value={filterVerification} onChange={e => setFilterVerification(e.target.value)} className="h-11 w-full">
+              <option value="all">همه وضعیت‌ها</option>
+              <option value="unverified">تأیید نشده</option>
+              <option value="pending">در انتظار</option>
+              <option value="verified">تأیید شده</option>
+              <option value="rejected">رد شده</option>
+            </select>
+          </label>
         </div>
       </div>
 
-      {/* جدول */}
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-        <div className="grid grid-cols-12 px-5 py-3 bg-gray-50 text-xs text-gray-500 font-medium border-b">
+      {/* فهرست: از lg جدولِ ۱۲ستونی، زیرِ آن کارتِ موبایل */}
+      <div className="overflow-hidden rounded-card border border-line/10 bg-surface">
+        <div className="hidden bg-paper px-4 py-3 text-xs text-ink-2 lg:grid lg:grid-cols-12" aria-hidden>
           <div className="col-span-3">کاربر</div>
           <div className="col-span-2">نقش</div>
           <div className="col-span-2">شهر</div>
@@ -165,43 +165,47 @@ export default function AdminUsersPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-16 text-gray-400">در حال بارگذاری...</div>
+          <ul aria-busy="true" aria-label="در حال بارگذاری" className="m-0 flex list-none flex-col gap-3 p-4">
+            {[0, 1, 2, 3, 4].map(i => <li key={i} className="h-16 rounded-card bg-line/[.06] motion-safe:animate-pulse" />)}
+          </ul>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">کاربری پیدا نشد</div>
+          <p className="m-0 py-12 text-center text-sm text-ink-2">کاربری پیدا نشد</p>
         ) : (
           /* ── چرا قاب ──
              فهرست بدون سقف رها بود: با پانصد کاربر صفحه چند ده هزار
              پیکسل بلند می‌شد و هرچه پایین فهرست بود ناپیدا. */
           <ScrollList count={filtered.length} min={8} gap={0}
-            className="divide-y divide-gray-50">
+            className="divide-y divide-line/10">
             {filtered.map(u => (
-              <div key={u.id} className="grid grid-cols-12 items-center px-5 py-3 hover:bg-gray-50">
-                <div className="col-span-3 flex items-center gap-3">
-                  <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold text-sm flex-shrink-0">
+              <div key={u.id} className="flex flex-col px-4 py-3 hover:bg-paper lg:grid lg:grid-cols-12 lg:items-center">
+                <div className="flex items-center gap-3 lg:col-span-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gold/15 text-sm font-semibold text-gold-text" aria-hidden>
                     {u.firstName?.[0]}
                   </div>
-                  <div>
-                    <div className="font-medium text-sm text-gray-800">{u.firstName} {u.lastName}</div>
-                    <div className="text-xs text-gray-400">{u.phone}</div>
+                  <div className="min-w-0">
+                    <div className="adm-break text-sm font-semibold text-ink">{u.firstName} {u.lastName}</div>
+                    <div className="text-xs text-ink-2">{u.phone}</div>
                   </div>
                 </div>
-                <div className="col-span-2">
-                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg">
-                    {roleLabels[u.primaryRole] || u.primaryRole}
-                  </span>
-                </div>
-                <div className="col-span-2 text-sm text-gray-500">{u.city || '—'}</div>
-                <div className="col-span-2">
-                  <span className={`text-xs px-2 py-1 rounded-full ${verificationColors[u.verificationStatus] || 'bg-gray-100 text-gray-600'}`}>
-                    {verificationLabels[u.verificationStatus] || '—'}
-                  </span>
-                </div>
-                <div className="col-span-1">
-                  {u.isProfileComplete ? (
-                    <CheckCircle size={16} className="text-green-500" />
-                  ) : (
-                    <XCircle size={16} className="text-red-400" />
-                  )}
+                {/* مشخصات: روی موبایل یک ردیفِ شکستنی از نشان‌های برچسب‌دار */}
+                <div className="mt-3 flex flex-wrap items-center gap-2 lg:contents lg:mt-0">
+                  <div className="lg:col-span-2">
+                    <span className="rounded-field bg-line/[.08] px-2 py-1 text-xs text-ink">
+                      {roleLabels[u.primaryRole] || u.primaryRole}
+                    </span>
+                  </div>
+                  <div className={`text-sm text-ink-2 lg:col-span-2 ${u.city ? '' : 'hidden lg:block'}`}>{u.city || '—'}</div>
+                  <div className="lg:col-span-2">
+                    <span className={`rounded-full px-2 py-1 text-xs ${verificationColors[u.verificationStatus] || 'bg-gray-100 text-gray-600'}`}>
+                      {verificationLabels[u.verificationStatus] || '—'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-ink-2 lg:col-span-1">
+                    {u.isProfileComplete
+                      ? <CheckCircle size={16} className="text-success" aria-hidden />
+                      : <XCircle size={16} className="text-danger" aria-hidden />}
+                    <span className="lg:sr-only">{u.isProfileComplete ? 'پروفایل کامل' : 'پروفایل ناقص'}</span>
+                  </div>
                 </div>
                 {/* موبایل: دکمه‌ها با نام، در ردیفِ زیرِ مشخصات (RowAction) */}
                 <div className={ROW_ACTIONS_CLASS}>
@@ -235,6 +239,6 @@ export default function AdminUsersPage() {
 
       {detail && <UserDetailDialog userId={detail} onClose={() => setDetail(null)}
         onRolesChanged={r => setUsers(us => us.map(x => x.id === detail ? { ...x, ...r } : x))} />}
-    </div>
+    </main>
   );
 }
