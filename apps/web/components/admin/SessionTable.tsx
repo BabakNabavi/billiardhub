@@ -40,7 +40,7 @@ export function SessionTable({ rows, names, onFilter }: {
   return (
     <>
       {/* ── موبایل ── */}
-      <ul className="divide-y divide-[#F0ECE2] sm:hidden">
+      <ul className="divide-y divide-[#F0ECE2] lg:hidden">
         {rows.map(r => (
           <li key={r.id} className="p-3">
             <div className="flex items-start justify-between gap-2">
@@ -67,7 +67,8 @@ export function SessionTable({ rows, names, onFilter }: {
       </ul>
 
       {/* ── دسکتاپ ── همان دلیلِ `LogTable`: کلاس روی div است نه table */}
-      <div className="hidden sm:block">
+      {/* جدول از lg — همان دلیلِ LogTable (ممیزیِ ui-audit) */}
+      <div className="hidden overflow-x-auto lg:block">
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-[#E7E2D6]">

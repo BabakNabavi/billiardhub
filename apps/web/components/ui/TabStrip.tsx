@@ -18,6 +18,7 @@
    الگویی که پنل باشگاه دارد.
    ───────────────────────────────────────────────────────────── */
 
+import { useEffect, useRef } from 'react'
 import DragScroll from './DragScroll'
 
 const GOLD_D = '#8F6531', MUT = '#6B7280', LINE = '#F0EDE8'
@@ -42,6 +43,23 @@ export default function TabStrip({
   onChange: (key: string) => void
   style?: React.CSSProperties
 }) {
+  /* ── تبِ فعال همیشه در دید ──
+     روی موبایل تبِ انتخاب‌شده ممکن بود بیرون از نوار بماند (مثلا وقتی از
+     نشانی یا پس از بازگشت انتخاب می‌شد) و کاربر نمی‌دید کجاست. فقط خودِ نوار
+     افقی جابه‌جا می‌شود — scrollIntoView صفحه را هم عمودی می‌برد. */
+  const activeRef = useRef<HTMLButtonElement | null>(null)
+  useEffect(() => {
+    /* فقط کادرِ خودِ نوار (DragScroll)؛ بالا رفتن در درخت ممکن بود والدِ بی‌ربطی را
+       (حتی overflow:hidden) جابه‌جا کند. ۲۶ پیکسل = محوکننده‌ی لبه‌ی DragScroll */
+    const b = activeRef.current
+    const c = b?.parentElement ?? null
+    if (!b || !c || c.scrollWidth <= c.clientWidth + 1) return
+    const cr = c.getBoundingClientRect(), br = b.getBoundingClientRect()
+    if (br.left >= cr.left + 26 && br.right <= cr.right - 26) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    c.scrollBy({ left: (br.left + br.width / 2) - (cr.left + cr.width / 2), behavior: reduce ? 'auto' : 'smooth' })
+  }, [value])
+
   return (
     <DragScroll style={{
       display: 'flex', gap: 4, marginBottom: 16,
@@ -54,7 +72,12 @@ export default function TabStrip({
         const fg = t.fg ?? GOLD_D
         const bg = t.bg ?? 'rgba(199,166,106,0.14)'
         return (
-          <button key={t.key} type="button" onClick={() => onChange(t.key)} style={{
+          <button key={t.key} type="button" onClick={() => onChange(t.key)}
+            ref={on ? activeRef : undefined}
+            /* دکمه‌ی ساده با aria-pressed، نه role=tab: تبِ واقعی کلیدهای جهت و
+               aria-controls می‌خواهد که این نوار ندارد. لمسِ ۴۴ و فوکوس از app/admin/admin.css */
+            aria-pressed={on}
+            style={{
             /* هیچ تبی نه کوچک می‌شود نه برچسبش دو خط — دو دلیل
                اصلی شکستن ردیف در نسخه‌های قبلی. */
             flex: '0 0 auto', whiteSpace: 'nowrap',

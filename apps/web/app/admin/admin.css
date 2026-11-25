@@ -1,0 +1,207 @@
+/* ─────────────────────────────────────────────────────────────
+   پنلِ ادمین — استانداردِ چیدمان (آذرِ ۱۴۰۵). مرجع: ui-audit.md در ریشه.
+
+   ── چرا CSS و نه فقط Tailwind ──
+   بیشترِ صفحه‌های ادمین استایلِ اینلاین دارند. قاعده‌های سراسریِ این فایل زیرِ
+   `.admin-scope` (app/admin/layout.tsx) هستند، پس فقط پنل را عوض می‌کنند، و جایی
+   که با اینلاین برابری لازم است `!important` دارند (اینلاین بی آن برنده است).
+   کلاس‌های آماده‌ی `.adm-*` و `.admin-back-btn` سراسری‌اند (استایلِ layout پس از
+   ناوبری می‌ماند) ولی نامشان یکتاست — پیشوندِ `ad-` نه: داشبورد `.ad-card`ِ خودش را دارد.
+
+   ── نقطه‌های شکست (همان md/lg/xlِ Tailwind، تا کلاس‌ها و این فایل یکی بمانند) ──
+     موبایل  < 768   ·  تبلت ≥ 768 (md)  ·  لپ‌تاپ ≥ 1024 (lg)  ·  دسکتاپ ≥ 1280 (xl)
+   در CSS: (max-width: 767px) / (min-width: 768px) / (min-width: 1024px) / (min-width: 1280px)
+   ───────────────────────────────────────────────────────────── */
+
+.admin-scope {
+  /* مقیاسِ فاصله — پایه‌ی ۴/۸ (همان پله‌های مجازِ CLAUDE.md: Tailwind 1·2·3·4·6·8·12) */
+  --ad-space-1: 4px;
+  --ad-space-2: 8px;
+  --ad-space-3: 12px;
+  --ad-space-4: 16px;
+  --ad-space-5: 24px;
+  --ad-space-6: 32px;
+  --ad-space-7: 48px;
+  /* فاصله‌ی کمینه‌ی المان‌های کنارِ هم */
+  --ad-gap: var(--ad-space-2);
+  /* حاشیه‌ی کناریِ صفحه: موبایل ۱۶، تبلت ۲۴، دسکتاپ ۳۲ */
+  --ad-gutter: var(--ad-space-4);
+  /* ناحیه‌ی لمس روی موبایل */
+  --ad-tap: 44px;
+  /* پهنای منطقی در دسکتاپ */
+  --ad-page-max: 1180px;
+  --ad-form-max: 720px;
+  --ad-prose-max: 68ch;
+
+  padding-inline: var(--ad-gutter);
+  padding-block-end: calc(var(--ad-space-7) + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  /* ⚠️ overflow-wrap روی کلِ پنل گذاشته نمی‌شود: آزموده شد و فیلترِ نقش‌های
+     «تیک آبی» (دکمه‌های flex:1 با minWidth:0) حرف‌به‌حرف شکست. شکستنِ متنِ بلند
+     فقط با کلاسِ `.adm-break` و جایی که لازم است */
+}
+@media (min-width: 768px) { .admin-scope { --ad-gutter: var(--ad-space-5); } }
+@media (min-width: 1280px) { .admin-scope { --ad-gutter: var(--ad-space-6); } }
+.admin-scope * { box-sizing: border-box; }
+
+/* ── فوکوسِ یکدست ── */
+.admin-scope :is(button, a, select, input, textarea, [role="tab"], [tabindex]):not([class*="focus-visible:"]):focus-visible {
+  outline: 2px solid #8F6531;
+  outline-offset: 2px;
+}
+
+/* ── کنترل‌ها هرگز از کادر بیرون نزنند ── */
+.admin-scope :is(select, input, textarea) { max-width: 100%; }
+
+/* ── جدولِ عریض داخلِ کادرِ خودش بلغزد، نه کلِ صفحه ──
+   والدِ مستقیمِ هر جدول کادرِ اسکرول می‌شود (در هر عرضی؛ پیش‌تر فقط زیرِ
+   ۴۸۰ و ۷۰۰، و ژورنال در ۷۶۸ کلِ صفحه را ۲۶۸ پیکسل افقی اسکرول می‌داد). */
+.admin-scope div:has(> table) { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+
+/* ══ موبایل ══ */
+@media (max-width: 767px) {
+  /* ناحیه‌ی لمس ۴۴×۴۴ (پیش‌تر ۴۰). !important لازم است: دکمه‌هایی که minHeightِ اینلاین
+     دارند (مثلا ۳۴ در ProfileAdmin) قاعده‌ی بی‌آن را می‌بردند — قاعده‌ی قبلی هم روی
+     همین‌ها هیچ‌وقت اعمال نمی‌شد (ممیزی با getComputedStyle) */
+  .admin-scope :is(button, a[role="button"], [role="tab"], select,
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"])) {
+    min-height: var(--ad-tap) !important;
+  }
+  .admin-scope :is(button, a[role="button"], [role="tab"]) { min-width: var(--ad-tap) !important; }
+  .admin-scope button > svg:only-child { display: block; margin: auto; }
+
+  /* فونتِ ورودی دست‌کم ۱۶ — زیرِ آن سافاریِ iOS روی فوکوس بزرگ‌نمایی می‌کند */
+  .admin-scope :is(input, select, textarea) { font-size: 16px !important; }
+
+  /* ریتمِ عمودی: فقط فرزندانِ مستقیمِ ریشه‌ی صفحه، تا چیدمانِ داخلی دست نخورد */
+  .admin-scope > div:not(.adm-page) > * + *:not([role="dialog"]):not(.fixed) { margin-top: var(--ad-space-3); }
+
+  /* پنجره‌ی بلندتر از صفحه داخلِ خودش اسکرول شود، نه بیرون از دید */
+  .admin-scope [role="dialog"] {
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* ══ جدول‌های ۱۲ستونیِ Tailwind (کاربران، محصولات، اخبار، رنکینگ) ══
+     ردیف روی موبایل دوستونه می‌شود. بازنویسیِ هر صفحه در مرحله‌ی بعد. */
+  .admin-scope .grid-cols-12 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: var(--ad-space-2);
+    column-gap: var(--ad-space-3);
+    padding-inline: var(--ad-space-4);
+  }
+  .admin-scope .grid-cols-12 > [class*="col-span-"] { grid-column: auto; }
+  /* ردیفِ کاملِ عمدی (components/admin/RowAction) — هم‌ویژگی و بعد از بالا، پس برنده */
+  .admin-scope .grid-cols-12 > .col-span-12 { grid-column: 1 / -1; }
+  .admin-scope .grid-cols-12.bg-gray-50 { display: none; }
+  .admin-scope .divide-y > * + * { border-top-width: 1px; padding-top: var(--ad-space-3); }
+}
+
+/* ── دکمه‌ی بازگشتِ مشترک (components/admin/AdminBack) ── */
+.admin-back-btn { min-height: var(--ad-tap); }
+.admin-back-btn:hover { border-color: rgba(199,166,106,0.55) !important; color: #8F6531 !important; }
+
+/* ── selectِ یکدست ── */
+.admin-scope select {
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238F6531' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  /* راست‌به‌چپ: شورون سمتِ پایانِ خط (چپ) */
+  background-position: left 12px center;
+  background-size: 14px;
+  border: 1px solid #E7E2D6 !important;
+  border-radius: 11px !important;
+  padding-block: 9px !important;
+  padding-inline: 14px 36px !important;
+  font-family: inherit; font-size: 13px; font-weight: 600; color: #1C1B17;
+  cursor: pointer;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.admin-scope select:dir(ltr) { background-position: right 12px center; }
+.admin-scope select:hover { border-color: rgba(199,166,106,0.5) !important; }
+.admin-scope select:focus {
+  outline: none;
+  border-color: rgba(199,166,106,0.65) !important;
+  box-shadow: 0 0 0 3px rgba(199,166,106,0.14);
+}
+.admin-scope select:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ═════════════════════════════════════════════════════════════
+   کلاس‌های آماده — صفحه‌های تازه و اصلاحِ مرحله‌ی بعد از این‌ها استفاده کنند
+   ═════════════════════════════════════════════════════════════ */
+
+/* بدنه‌ی صفحه: پهنای منطقی، وسط‌چین، فاصله‌ی عمودیِ یکدست بینِ بخش‌ها */
+.adm-page { max-width: var(--ad-page-max); margin-inline: auto; padding-block: var(--ad-space-5) var(--ad-space-7); display: grid; gap: var(--ad-space-5); }
+.adm-page > * { min-width: 0; }
+
+/* سربرگِ صفحه: عنوان + دکمه‌ها؛ وقتی جا نشد منظم می‌شکند */
+.adm-header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--ad-space-3); }
+.adm-header > :first-child { min-width: 0; flex: 1 1 240px; }
+
+/* عنوانِ بلند: یک خط با سه‌نقطه (متنِ کامل در title) */
+.adm-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+/* متنِ بلندِ بی‌فاصله (شناسه، توکن، نشانی) هر جا لازم شد بشکند */
+.adm-break { overflow-wrap: anywhere; }
+
+/* نوارِ ابزار (جست‌وجو، فیلتر، دکمه): یک ردیف که منظم می‌شکند */
+.adm-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ad-gap); }
+.adm-toolbar > :is(input[type="search"], .adm-grow) { flex: 1 1 220px; min-width: 0; }
+
+/* ردیفِ دکمه‌ها: هم‌ارتفاع، با فاصله، شکستنی */
+.adm-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ad-gap); }
+.adm-actions > * { min-height: var(--ad-tap); }
+
+/* کارت: یک پدینگ برای همه؛ کارتِ تودرتو روی موبایل پدینگِ کمتر (پهنا تلف نشود) */
+.adm-card { background: #fff; border: 1px solid #EFEBE1; border-radius: var(--r3, 14px); padding: var(--ad-space-5); min-width: 0; }
+.adm-card .adm-card { padding: var(--ad-space-4); }
+@media (max-width: 767px) {
+  .adm-card { padding: var(--ad-space-4); }
+  .adm-card .adm-card { padding: var(--ad-space-3); }
+}
+
+/* فرم: موبایل تک‌ستون با برچسبِ بالا؛ تبلت به بالا دوستونه؛ پهنای منطقی */
+.adm-form { display: grid; gap: var(--ad-space-4); max-width: var(--ad-form-max); }
+@media (min-width: 768px) { .adm-form { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--ad-space-5); } }
+.adm-form > .adm-wide { grid-column: 1 / -1; }
+.adm-field { display: grid; gap: var(--ad-space-2); min-width: 0; }
+.adm-field > label { font-size: 13px; font-weight: 700; color: #1C1B17; }
+
+/* دکمه‌ی ذخیره‌ی فرمِ بلند: چسبیده به پایینِ دید (با حاشیه‌ی امنِ آیفون) */
+.adm-sticky-actions {
+  position: sticky; bottom: 0; z-index: 5;
+  display: flex; flex-wrap: wrap; gap: var(--ad-gap); justify-content: flex-end;
+  padding: var(--ad-space-3) 0 calc(var(--ad-space-3) + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #F7F5F0 70%, rgba(247,245,240,0));
+}
+
+/* جدول: کادرِ اسکرولِ افقی + هدرِ چسبان + ستونِ عملیاتِ هم‌تراز */
+.adm-table-wrap { overflow: auto; max-width: 100%; max-height: min(70vh, 720px); border: 1px solid #EFEBE1; border-radius: var(--r3, 14px); background: #fff; }
+.adm-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.adm-table th { position: sticky; top: 0; z-index: 1; background: #FBFAF7; text-align: start; font-size: 12px; font-weight: 800; color: #6F6A5C; padding: var(--ad-space-3); border-block-end: 1px solid #EFEBE1; white-space: nowrap; }
+.adm-table td { padding: var(--ad-space-3); border-block-end: 1px solid #F3F0E8; font-size: 13px; vertical-align: middle; }
+.adm-table .adm-col-actions { text-align: end; white-space: nowrap; width: 1%; }
+
+/* پنجره: موبایل برگه‌ی پایین (bottom sheet)، دسکتاپ وسط با پهنای منطقی */
+.adm-modal-backdrop { position: fixed; inset: 0; z-index: 90; background: rgba(16,16,14,.42); display: grid; place-items: center; padding: var(--ad-space-4); }
+.adm-modal { width: min(560px, 100%); max-height: calc(100dvh - 2 * var(--ad-space-4)); overflow-y: auto; background: #fff; border-radius: var(--r5, 24px); padding: var(--ad-space-5); }
+@media (max-width: 767px) {
+  .adm-modal-backdrop { place-items: end stretch; padding: 0; }
+  .adm-modal { width: 100%; max-height: 92dvh; border-radius: var(--r5, 24px) var(--r5, 24px) 0 0; padding: var(--ad-space-4) var(--ad-space-4) calc(var(--ad-space-4) + env(safe-area-inset-bottom)); }
+}
+
+/* متنِ خواندنی در دسکتاپ زیادی کش نیاید */
+.adm-prose { max-width: var(--ad-prose-max); }
+
+/* ── کنترلِ تکه‌تکه‌ی سایت (.lq-seg) داخلِ پنل ──
+   با گزینه‌های زیاد (فیلترِ هشت‌نقشِ «تیک آبی») دکمه‌ها با flex:1 و minWidth:0 آن‌قدر
+   باریک می‌شدند که برچسب‌ها دوخطه و چسبیده (۳ پیکسل) می‌شدند. حالا مثلِ نوارِ تب: یک
+   ردیف که افقی می‌لغزد و هر گزینه اندازه‌ی برچسبِ خودش را دارد —
+   فقط روی موبایل (لمس، سوایپ)؛ دسکتاپ با موس همان شکستنِ قبلی را دارد چون این‌جا
+   درگ و محوکننده‌ی لبه نیست. */
+@media (max-width: 767px) {
+  .admin-scope .lq-seg { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; max-width: 100%; padding-block: 4px; }
+  .admin-scope .lq-seg::-webkit-scrollbar { display: none; }
+  .admin-scope .lq-seg > :is(button, a) { flex: 0 0 auto !important; white-space: nowrap; outline-offset: -2px; }
+}

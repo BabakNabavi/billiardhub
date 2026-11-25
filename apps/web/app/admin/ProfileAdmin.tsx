@@ -100,7 +100,7 @@ export default function ProfileAdmin({
   };
 
   return (
-    <div dir="rtl" style={{ minHeight: '70vh', background: '#F7F5F0', fontFamily: 'Vazirmatn,Tahoma,sans-serif', color: TEXT, paddingBottom: 64 }}>
+    <div dir="rtl" style={{ minHeight: '70vh', background: '#F7F5F0', fontFamily: 'inherit', color: TEXT, paddingBottom: 64 }}>
       <div style={{ maxWidth: 920, margin: '0 auto', padding: '24px clamp(16px,3vw,28px) 0' }}>
 
         {/* سربرگ */}
@@ -148,7 +148,9 @@ export default function ProfileAdmin({
                   border: `1px solid ${r.status === 'approved' ? 'rgba(14,122,56,0.25)' : 'rgba(178,59,46,0.25)'}` }}>
                   {r.status === 'approved' ? 'منتشر شده' : 'معلق'}
                 </span>
-                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                {/* دکمه‌ها می‌شکنند: پیش‌تر flexShrink:0 بی wrap بود و روی ۳۶۰ پیکسل «تعلیق» و
+                    «مشاهده صفحه» تا ۲۰۰ پیکسل بیرون از صفحه می‌رفتند (ممیزیِ ui-audit) */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, flex: '0 1 auto', minWidth: 0, marginInlineStart: 'auto' }}>
                   {/* ── جزئیات ──
                       تا امروز این فهرست فقط یک نام و سه دکمه بود.
                       تصمیم‌گرفتن درباره‌ی چیزی که دیده نمی‌شود تأیید

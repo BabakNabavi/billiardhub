@@ -64,7 +64,7 @@ export function AuditTable({ rows, names, onFilter }: {
   return (
     <>
       {/* ── موبایل ── */}
-      <ul className="divide-y divide-[#F0ECE2] sm:hidden">
+      <ul className="divide-y divide-[#F0ECE2] lg:hidden">
         {rows.map(r => (
           <li key={r.id} className="p-3">
             <div className="flex items-start justify-between gap-2">
@@ -86,12 +86,15 @@ export function AuditTable({ rows, names, onFilter }: {
       </ul>
 
       {/* ── دسکتاپ ──
-          ⚠️ `hidden sm:block` روی این *div* است، نه روی `<table>`.
+          ⚠️ `hidden lg:block` روی این *div* است، نه روی `<table>`.
           `admin/layout.tsx` قاعده‌ی `.admin-scope table{display:block}`
           را در دو مدیاکوئری دارد و specificityِ آن (۰,۱,۱) از `.hidden`
           تیلویند (۰,۱,۰) بیشتر است — پس جدول زیرِ ۷۰۰px پنهان
           **نمی‌شد** و هر ردیف کنارِ کارتِ موبایل دوبار رندر می‌شد. */}
-      <div className="hidden sm:block">
+      {/* جدول از lg: هفت ستون در ۷۶۸ جا نمی‌شد و کلِ صفحه ۲۶۸ پیکسل افقی اسکرول
+          می‌خورد (ممیزیِ ui-audit)؛ تبلت هم فهرستِ کارتی را می‌گیرد. overflow-x-auto فقط
+          پشتیبان برای عرض‌های مرزی است، نه حالتِ اصلی. */}
+      <div className="hidden overflow-x-auto lg:block">
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-[#E7E2D6]">
