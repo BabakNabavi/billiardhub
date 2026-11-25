@@ -178,7 +178,7 @@ export default function AdminStoryPlans() {
       <AdminHeader
         icon={<Package size={26} className="text-gold-text" aria-hidden />}
         title="بسته‌های استوری"
-        description="هر بسته را خودتان می‌سازید: چند استوری، در چه بازه‌ای، چند روز اعتبار و چه قیمتی. قیمت و تعداد را هر وقت بخواهید عوض کنید — سفارش‌های قبلی دست‌نخورده می‌مانند"
+        description="هر بسته را خودتان می‌سازید: چند استوری، در چه بازه‌ای، چند روز اعتبار و چه قیمتی — قیمت و تعداد را هر وقت بخواهید عوض کنید — سفارش‌های قبلی دست‌نخورده می‌مانند"
         actions={
           <Link href="/story-plans" className={buttonClasses({ variant: 'secondary', size: 'sm' })}>
             <ArrowLeft size={14} aria-hidden /> دیدن صفحه‌ی کاربران

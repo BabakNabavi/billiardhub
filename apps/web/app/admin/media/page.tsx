@@ -130,7 +130,7 @@ export default function AdminMediaPage() {
       <AdminHeader
         icon={<Clapperboard size={26} className="text-gold-text" aria-hidden />}
         title="مدیریت بیلیارد مدیا"
-        description="هر تغییری همین‌جا روی صفحه‌ی عمومی، فهرست و نقشه‌ی سایت اثر می‌گذارد. ویدیوی «مخفی» یا «ردشده» برای بازدیدکننده باز نمی‌شود و در نقشه‌ی سایت نمی‌آید" />
+        description="هر تغییری همین‌جا روی صفحه‌ی عمومی، فهرست و نقشه‌ی سایت اثر می‌گذارد — ویدیوی «مخفی» یا «ردشده» برای بازدیدکننده باز نمی‌شود و در نقشه‌ی سایت نمی‌آید" />
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
 
         {FILTERS.map(f => (

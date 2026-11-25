@@ -230,7 +230,7 @@ export default function AdminRankingsPage() {
           {['آقایان', 'بانوان'].map(g => (
             <div key={g} className="bg-white rounded-2xl shadow-sm overflow-hidden">
               <button onClick={() => { setGender(g); setCategory(Object.keys(rankings[sport]?.[g] ?? {})[0] ?? 'دسته برتر'); }}
-                className={`w-full text-right px-4 py-3 font-bold text-sm ${gender === g ? 'bg-ink text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'}`}>
+                className={`w-full text-start px-4 py-3 font-bold text-sm ${gender === g ? 'bg-ink text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'}`}>
                 {g === 'آقایان' ? '👨 آقایان' : '👩 بانوان'}
               </button>
               {gender === g && (
@@ -241,7 +241,7 @@ export default function AdminRankingsPage() {
                 <div className="p-1 space-y-1">
                   {Object.keys(rankings[sport]?.[g] ?? {}).map(cat => (
                     <button key={cat} onClick={() => setCategory(cat)}
-                      className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-all ${category === cat ? 'bg-gold/15 text-gold-text font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
+                      className={`w-full text-start px-3 py-2 rounded-lg text-sm transition-all ${category === cat ? 'bg-gold/15 text-gold-text font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
                       {cat}
                     </button>
                   ))}

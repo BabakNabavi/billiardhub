@@ -155,7 +155,7 @@ export default function AdminTournaments() {
       <AdminHeader
         icon={<Trophy size={26} className="text-gold-text" aria-hidden />}
         title="مسابقات باشگاه‌ها"
-        description="مسابقاتی که باشگاه‌ها ساخته‌اند — با ثبت‌نام و پول واقعی. این با «رویدادها» فرق دارد؛ آن‌ها محتوای دستی خود شماست"
+        description="مسابقاتی که باشگاه‌ها ساخته‌اند — با ثبت‌نام و پول واقعی — این با «رویدادها» فرق دارد؛ آن‌ها محتوای دستی خود شماست"
         actions={
           <Button variant="primary" icon={<Plus size={13} aria-hidden />} onClick={() => setShowNew(v => !v)}>
             مسابقه‌ی جدید

@@ -107,7 +107,7 @@ export default function AdminReports() {
       <AdminHeader
         icon={<Flag size={26} className="text-gold-text" aria-hidden />}
         title="گزارش‌های تخلف"
-        description={counts.OPEN ? `${toFaDigits(counts.OPEN)} گزارش بررسی‌نشده` : undefined} />
+        description={counts.OPEN ? <span className="font-semibold text-danger-ink">{toFaDigits(counts.OPEN)} گزارش بررسی‌نشده</span> : undefined} />
 
       {/* ── هشدار پیامکی ──
           بدون شماره، ادمین فقط وقتی خبردار می‌شود که خودش این صفحه را

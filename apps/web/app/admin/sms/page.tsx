@@ -339,6 +339,7 @@ export default function AdminSms() {
 }
 
 
+/* نشانگر روشن/خاموش یک پیش‌نیاز */
 function Flag2({ ok, label, on, off }: { ok: boolean; label: string; on: string; off: string }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5 }}>
