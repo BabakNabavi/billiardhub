@@ -88,6 +88,7 @@ jobs:
           npm run test:working-hours
           npm run test:club-open-status
           npm run test:private-fields
+          npm run test:hero-title
 
       # سقفِ حجمِ JS و تصویر — جلوگیری از برگشتِ کندی (scripts/check-perf-budget.mjs)
       - name: سقف حجم

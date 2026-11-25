@@ -5,6 +5,8 @@ import {
 import type { HeroData } from '@/lib/home-hero'
 import type { RealClub, RealProduct, RealStore } from '@/lib/home-types'
 import { HeroCards } from './HeroCards'
+import { HoldTitleLine } from './HoldTitleLine'
+import { HERO_TITLE_LEAD, HERO_TITLE_ACCENT, HERO_TITLE_DANA_EM } from './hero-title'
 import { isClosedSection } from '@/lib/nav-gates'
 import './home-hero.css'
 
@@ -51,9 +53,12 @@ export function HomeHero({ data, newestClubs, newestProducts, stores }: {
         {/* ── متن ── */}
         <div className="min-w-0">
           {/* همان تیتر و زیرنویسِ هیروی قبلی (خواستِ مالک) — کلیدواژه‌ی اصلیِ سئو هم همین است */}
-          <h1 id="hh-title" className="hh-rise text-display font-extrabold max-[900px]:text-center">
-            پلتفرم جامع و تخصصی <span className="text-gold-light">بیلیارد</span>
+          {/* suppressHydrationWarning: HoldTitleLine تا رسیدنِ فونت سبکِ درون‌خطیِ موقت می‌گذارد */}
+          <h1 id="hh-title" className="hh-rise text-display font-extrabold max-[900px]:text-center" suppressHydrationWarning>
+            {HERO_TITLE_LEAD} <span className="text-gold-light">{HERO_TITLE_ACCENT}</span>
           </h1>
+          {/* متن و پهنای اندازه‌گرفته‌اش یک‌جا در hero-title — آزمون: test-hero-title */}
+          <HoldTitleLine targetId="hh-title" danaEm={HERO_TITLE_DANA_EM} />
           <p className="hh-in mt-3 max-w-prose text-sub text-white/70 hh-d1 max-[900px]:mx-auto max-[900px]:text-center">
             اتصال بی‌واسطه؛ خانه‌ی دیجیتال جامعه‌ی بیلیارد{' '}
             {/* «ایران» با گرادیانِ عمودیِ پرچم: سبز، سفید، قرمز */}
