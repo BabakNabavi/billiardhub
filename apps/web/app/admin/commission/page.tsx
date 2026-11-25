@@ -16,6 +16,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { faNum } from '@/lib/jalali'
 import { Percent, Loader2, AlertCircle, Save, History, Info } from 'lucide-react'
 import { apiFetch } from '../../../lib/http'
+import { AdminHeader } from '../../../components/admin/AdminHeader'
 import { toFaDigits, faDate } from '../../../lib/jalali'
 
 const INK = '#1C1B17', SEC = '#5B564B', MUT = '#6F6A5C', LINE = '#EAE5DA'
@@ -94,14 +95,11 @@ export default function AdminCommission() {
   }
 
   return (
-    <div dir="rtl" style={{ fontFamily: 'var(--font-base)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-        <Percent size={20} style={{ color: GOLD_D }} />
-        <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>نرخ کمیسیون</h1>
-      </div>
-      <p style={{ fontSize: 12.5, color: SEC, lineHeight: 2, margin: '0 0 16px', maxWidth: 700 }}>
-        سهم پلتفرم از هر رزرو یا ثبت‌نام مسابقه، نرخ اختصاصی یک باشگاه بر نرخ سراسری اولویت دارد
-      </p>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Percent size={26} className="text-gold-text" aria-hidden />}
+        title="نرخ کمیسیون"
+        description="سهم پلتفرم از هر رزرو یا ثبت‌نام مسابقه، نرخ اختصاصی یک باشگاه بر نرخ سراسری اولویت دارد" />
 
       {/* ── نرخ‌های فعال ── */}
       <div style={{ display: 'grid', gap: 10, gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', marginBottom: 20 }}>
@@ -129,7 +127,7 @@ export default function AdminCommission() {
       </div>
 
       {/* ── تغییر نرخ ── */}
-      <div style={{ border: `1px solid ${LINE}`, borderRadius: 16, padding: '16px 17px', background: '#fff' }}>
+      <div className="adm-card max-w-[var(--ad-form-max)]">
         <h3 style={{ fontSize: 14, fontWeight: 900, color: INK, margin: '0 0 13px' }}>ثبت نرخ تازه</h3>
 
         <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(165px,1fr))' }}>
@@ -237,7 +235,7 @@ export default function AdminCommission() {
           )}
         </div>
       )}
-    </div>
+    </main>
   )
 }
 

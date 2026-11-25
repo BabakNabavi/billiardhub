@@ -6,6 +6,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { notify } from '../../../lib/ui/dialogs'
 import { apiFetch } from '../../../lib/http'
+import TabStrip from '../../../components/ui/TabStrip'
+import { AdminHeader } from '../../../components/admin/AdminHeader'
 import CommissionPanel from '../../../components/admin/CommissionPanel'
 import PayoutOrders from '../../../components/admin/PayoutOrders'
 import TransactionsReport from '../../../components/admin/TransactionsReport'
@@ -104,22 +106,14 @@ export default function AdminFinance() {
   ]
 
   return (
-    <div dir="rtl" style={{ fontFamily: 'var(--font-base)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
-        <Wallet size={22} style={{ color: GOLD_D }} />
-        <h1 style={{ fontSize: 21, fontWeight: 900, color: INK, margin: 0 }}>مالی</h1>
-        <span style={{ fontSize: 12, color: MUT }}>ارقام از دفتر مالی محاسبه می‌شوند</span>
-      </div>
+    <main className="adm-page">
+      <AdminHeader
+        icon={<Wallet size={26} className="text-gold-text" aria-hidden />}
+        title="مالی"
+        description="ارقام از دفتر مالی محاسبه می‌شوند" />
 
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 18 }}>
-        {TABS.map(([k, label, n]) => (
-          <button key={k} onClick={() => setTab(k)}
-            style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 15px', borderRadius: 999, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 800,
-              background: tab === k ? INK : '#fff', color: tab === k ? '#fff' : SEC, border: `1px solid ${tab === k ? INK : LINE}` }}>
-            {label}{n > 0 && <span style={{ fontSize: 10.5, opacity: .75 }}>({fa(n)})</span>}
-          </button>
-        ))}
-      </div>
+      <TabStrip value={tab} onChange={k => setTab(k as TabKey)} style={{ marginBottom: 0 }}
+        tabs={TABS.map(([k, label, n]) => ({ key: k, label, count: n > 0 ? n : undefined }))} />
 
       {/* ── بازه‌ی گزارش ──
           تا امروز این مسیر سه پارامتر `from/to/clubId` را پشتیبانی
@@ -283,7 +277,7 @@ export default function AdminFinance() {
       <style>{`
         .af-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         @media (max-width: 900px) { .af-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 560px) { .af-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 560px) { .af-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } }
 
         .af-range { display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
           padding: 11px 14px; background: ${GROUND}; border: 1px solid ${LINE};
@@ -298,7 +292,7 @@ export default function AdminFinance() {
           outline: 2px solid ${GOLD_D}; outline-offset: 2px; }
         .af-range-n { font-size: 11px; color: ${MUT}; margin-inline-start: auto; }
       `}</style>
-    </div>
+    </main>
   )
 }
 
@@ -386,20 +380,22 @@ const SettleBadge = ({ s }: { s: string }) => {
 function RefModal({ amount, onClose, onSubmit }: { amount: number; onClose: () => void; onSubmit: (ref: string) => void }) {
   const [ref, setRef] = useState('')
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(20,18,14,0.5)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 18 }}>
-      <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 380, background: '#fff', borderRadius: 20, border: `1px solid ${LINE}`, padding: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-          <CreditCard size={18} style={{ color: GOLD_D }} />
-          <span style={{ fontSize: 15, fontWeight: 900, color: INK, flex: 1 }}>ثبت واریز</span>
-          <button type="button" aria-label="بستن" onClick={onClose} style={{ background: '#F4F3F1', border: `1px solid ${LINE}`, borderRadius: 9, padding: 6, cursor: 'pointer', color: SEC, display: 'flex' }}><X size={15} /></button>
+    <div onClick={onClose} className="adm-modal-backdrop">
+      <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="fin-ref-title" className="adm-modal">
+        <div className="mb-3 flex items-center gap-2">
+          <CreditCard size={18} className="text-gold-text" aria-hidden />
+          <h2 id="fin-ref-title" className="m-0 flex-1 text-xl font-semibold text-ink">ثبت واریز</h2>
+          <button type="button" aria-label="بستن" onClick={onClose}
+            className="inline-flex size-11 items-center justify-center rounded-field border border-line/10 bg-line/[.05] text-ink-2 hover:bg-line/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep"><X size={15} aria-hidden /></button>
         </div>
-        <p style={{ fontSize: 13, color: SEC, margin: '0 0 14px', lineHeight: 1.9 }}>
-          مبلغ <b style={{ color: INK }}>{fa(amount)} تومان</b> واریز شد؟ شماره‌ی پیگیری بانکی را وارد کنید
+        <p className="m-0 mb-3 text-sm leading-loose text-ink-2">
+          مبلغ <b className="text-ink">{fa(amount)} تومان</b> واریز شد؟ شماره‌ی پیگیری بانکی را وارد کنید
         </p>
-        <input value={ref} onChange={e => setRef(e.target.value)} placeholder="شماره‌ی پیگیری"
-          style={{ width: '100%', boxSizing: 'border-box', padding: '11px 13px', borderRadius: 11, border: `1px solid ${LINE}`, background: GROUND, fontSize: 13.5, fontFamily: 'inherit', color: INK, outline: 'none', direction: 'ltr', textAlign: 'left' }} />
-        <button onClick={() => ref.trim() && onSubmit(ref.trim())} disabled={!ref.trim()}
-          style={{ width: '100%', marginTop: 12, padding: 12, borderRadius: 12, border: 'none', cursor: ref.trim() ? 'pointer' : 'not-allowed', fontFamily: 'inherit', fontSize: 14, fontWeight: 800, background: ref.trim() ? FELT : '#EDE9E1', color: ref.trim() ? '#fff' : MUT }}>
+        <label htmlFor="fin-ref" className="sr-only">شماره‌ی پیگیری</label>
+        <input id="fin-ref" value={ref} onChange={e => setRef(e.target.value)} placeholder="شماره‌ی پیگیری" dir="ltr"
+          className="h-11 w-full rounded-field border border-line/20 bg-paper px-3 text-start text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep" />
+        <button type="button" onClick={() => ref.trim() && onSubmit(ref.trim())} disabled={!ref.trim()}
+          className="mt-3 h-11 w-full rounded-field bg-success text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-deep disabled:cursor-not-allowed disabled:bg-line/20 disabled:text-ink-2">
           تأیید و نهایی‌سازی
         </button>
       </div>
