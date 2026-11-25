@@ -109,6 +109,9 @@ const CUR_JYEAR = (() => { try { return parseInt(new Intl.DateTimeFormat('en-US-
 interface CoachEntry { id: string; slug?: string; name: string; title: string; exp: string; bio: string; status?: 'pending' | 'accepted' | 'rejected'; }
 interface ClubAlbumItem { id: string; dataUrl: string; name: string; caption: string; }
 interface ClubAlbum { id: string; name: string; createdAt: string; items: ClubAlbumItem[]; }
+/* آلبومِ «تصاویر باشگاه» در گالری — از همان عکس‌های پنلِ باشگاه (club.images)، پایین */
+const CLUB_PHOTOS_ALBUM = 'تصاویر باشگاه';
+const CLUB_PHOTOS_KEY = 'club-images';
 /* همان شکل ویدیوی بقیه‌ی نقش‌ها */
 interface ClubVideo { id: string; url?: string; thumbnail: string; title: string; duration: string; album?: string }
 interface ClubStats { members: string; tournaments: string; yearsActive: string; dailyCapacity: string; }
@@ -660,16 +663,43 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
     await saveClubVideos(clubVideos.filter(v => v.id !== vid));
   };
 
-  const clubGalleryImages = clubAlbums.flatMap(a =>
-    a.items.map(it => ({ id: `${a.id}/${it.id}`, url: it.dataUrl, caption: it.caption ?? '', album: a.name })));
+  /* ── آلبومِ «تصاویر باشگاه» (آذرِ ۱۴۰۵، خواستِ مالک) ──
+     عکس‌هایی که باشگاه‌دار در پنلِ باشگاه بارگذاری می‌کند (club.images، همان اسلایدرِ
+     هیرو) در تبِ تصاویرِ گالری هم، در آلبومی به همین نام، دیده می‌شوند. کپی نمی‌شوند و از
+     همان فهرست ساخته می‌شوند: هر بارگذاری، حذف یا جابه‌جایی در پنل همین‌جا هم هست، و
+     حذف و ترتیبشان هم همان‌جاست (پایین: onDelete). همان نشانیِ اسلایدرِ هیرو (۱۲۸۰، کیفیتِ
+     ۷۰) تا عکسِ دیده‌شده از کش بیاید، نه دانلودِ دوباره — عکسِ خام گاهی چند مگابایت است. */
+  const clubPhotoItems = (Array.isArray(club.images) ? club.images : [])
+    .filter((u): u is string => typeof u === 'string' && u.trim() !== '')
+    .map((u, i) => ({ id: `${CLUB_PHOTOS_KEY}/${i}`, url: thumbUrl(u, 1280, 70), caption: '', album: CLUB_PHOTOS_ALBUM }));
+  const clubGalleryImages = [
+    ...clubPhotoItems,
+    ...clubAlbums.flatMap(a =>
+      a.items.map(it => ({ id: `${a.id}/${it.id}`, url: it.dataUrl, caption: it.caption ?? '', album: a.name }))),
+  ];
+  /* «تصاویر باشگاه» اول؛ ProfileGallery آلبوم‌های هم‌نام را یکی می‌کند و اولی را نگه می‌دارد */
+  const clubAlbumNames = [...(clubPhotoItems.length ? [CLUB_PHOTOS_ALBUM] : []), ...clubAlbums.map(a => a.name)];
 
   const addClubPhotos = async (files: File[], album?: string) => {
+    /* عکس‌های اصلیِ باشگاه یک منبع دارند (پنلِ باشگاه ⟵ club.images و اسلایدرِ هیرو)؛ افزودن از
+       این‌جا آلبومی جدا با همان نام می‌ساخت که به هیرو نمی‌رسید و در یک آلبوم عکسِ حذف‌شدنی و
+       حذف‌نشدنی کنارِ هم می‌نشاند */
+    if (album?.trim() === CLUB_PHOTOS_ALBUM) {
+      notify('عکس‌های اصلیِ باشگاه از پنلِ باشگاه اضافه می‌شوند و خودبه‌خود این‌جا هم دیده می‌شوند', 'gold');
+      return;
+    }
     const items = await Promise.all(files.map(async fl => ({
       id: Math.random().toString(36).slice(2, 9),
       dataUrl: await compressImage(fl),
       name: fl.name, caption: '',
     })));
-    const target = album ? clubAlbums.findIndex(a => a.name === album) : 0;
+    const target = album ? clubAlbums.findIndex(a => a.name.trim() === album.trim()) : 0;
+    /* نامی که آلبومِ واقعی ندارد ⟵ آلبومِ واقعی با همان نام؛ پیش‌تر عکس بی‌صدا در آلبومِ اول
+       می‌نشست */
+    if (album && target < 0) {
+      await saveAlbums([...clubAlbums, { id: `a${Date.now()}`, name: album, createdAt: new Date().toISOString(), items }]);
+      return;
+    }
     const at = target >= 0 ? target : 0;
     const next = clubAlbums.length
       ? clubAlbums.map((a, i) => (i === at ? { ...a, items: [...a.items, ...items] } : a))
@@ -1594,10 +1624,17 @@ export function ClubProfileClient({ initialClub }: { initialClub?: Club | null }
               <ProfileGallery
                 images={clubGalleryImages}
                 videos={clubVideos}
-                albumNames={clubAlbums.map(a => a.name)}
+                albumNames={clubAlbumNames}
                 onOpenImage={(urls, index, meta, ids) => openImage(urls, {
                   index, ...meta,
-                  ...(isClubOwner ? { onDelete: (i: number) => deleteClubPhoto(ids[i] ?? '') } : {}),
+                  /* عکس‌های اصلیِ باشگاه از پنلِ باشگاه حذف می‌شوند، نه از گالری: مجموعه‌ای که فقط از
+                     آن‌هاست (آلبومِ «تصاویر باشگاه») دکمه‌ی حذف نمی‌گیرد؛ در مجموعه‌ی مخلوطِ تبِ
+                     تصاویر، زدنِ حذف روی آن‌ها فقط راهنمایی می‌کند */
+                  ...(isClubOwner && !ids.every(x => x.startsWith(`${CLUB_PHOTOS_KEY}/`)) ? {
+                    onDelete: (i: number) => ((ids[i] ?? '').startsWith(`${CLUB_PHOTOS_KEY}/`)
+                      ? notify('این تصویر از عکس‌های اصلیِ باشگاه است؛ حذف و ترتیبش از پنلِ باشگاه انجام می‌شود', 'gold')
+                      : deleteClubPhoto(ids[i] ?? '')),
+                  } : {}),
                 })}
                 onOpenVideo={v => openVideo(v, isClubOwner ? { onDelete: () => deleteClubVideo(v.id), onEdit: () => editVideo(v) } : undefined)}
                 canEdit={isClubOwner} busy={albumBusy}
