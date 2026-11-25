@@ -17,7 +17,7 @@ import type { HeroAdItem } from './hero-types'
    ───────────────────────────────────────────────────────────── */
 
 const PER_PAGE = 3
-const EVERY_MS = 5500
+const EVERY_MS = 4500
 
 export function HeroAdsCard({ ads, pos }: { ads: HeroAdItem[]; pos: string }) {
   const ref = useRef<HTMLDivElement>(null)

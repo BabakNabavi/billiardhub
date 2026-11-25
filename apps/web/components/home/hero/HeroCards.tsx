@@ -126,7 +126,7 @@ export function HeroCards({ data, newestClubs, newestProducts, stores: allStores
   const cards: ((pos: string) => React.ReactNode)[] = []
   if (data.live) { const l = data.live; cards.push(pos => <LiveCard key="live" live={l} pos={pos} />) }
   else if (clubs.length) cards.push(pos => (
-    <HeroSpotCard key="club" items={clubs} pos={pos} hrefBase="/clubs" fit="cover" everyMs={5000}
+    <HeroSpotCard key="club" items={clubs} pos={pos} hrefBase="/clubs" fit="cover" everyMs={4000}
       label={['تازه‌ترین باشگاه', 'تازه‌ترین باشگاه‌ها']} />
   ))
   /* مسابقه‌ی پیشِ رو/در جریان اولویت دارد؛ نبود ⟵ آگهی‌های تازه‌ی بازار */
@@ -136,7 +136,7 @@ export function HeroCards({ data, newestClubs, newestProducts, stores: allStores
   /* فروشگاه‌ها فقط در گوشی (خواستِ مالک): ردیفِ سوایپی جای کارتِ چهارم دارد؛
      دسته‌ی سه‌کارتیِ دسکتاپ و ردیفِ سه‌تاییِ تبلت نه */
   if (stores.length) cards.push(pos => (
-    <HeroSpotCard key="stores" items={stores} pos={pos} hrefBase="/sellers" fit="logo" everyMs={6000}
+    <HeroSpotCard key="stores" items={stores} pos={pos} hrefBase="/sellers" fit="logo" everyMs={5000}
       label={['فروشگاه تجهیزات', 'فروشگاه‌های تجهیزات']} className="min-[601px]:hidden" />
   ))
   if (cards.length === 0) return null
