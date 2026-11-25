@@ -168,6 +168,10 @@ export async function notifyBookingConfirmed(bookingId: string): Promise<void> {
   }
 }
 
+/** فقط رقم‌های لاتین — برای مقایسه‌ی دو شماره‌ای که ممکن است یکی فارسی نوشته شده باشد */
+const digitsOf = (m: string | null | undefined) =>
+  String(m ?? '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\D/g, '')
+
 /** چه کسی رزرو را لغو کرد — تعیین می‌کند باشگاه‌دار خبر بگیرد یا نه */
 export type CancelledBy = 'user' | 'owner' | 'admin'
 
@@ -178,7 +182,8 @@ export type CancelledBy = 'user' | 'owner' | 'admin'
  * وقتی باشگاه یا ادمین لغو کرده هم درست می‌خواند.
  *
  * به باشگاه‌دار فقط وقتی که:
- *  • لغو از سوی خودش نبود — او خودش می‌داند؛
+ *  • لغو از سوی خودش نبود — او خودش می‌داند (جز اگر «شماره‌ی اطلاع‌رسانی»ِ
+ *    دیگری برای مدیرِ باشگاه ثبت باشد؛ آن شماره از لغوِ مالک بی‌خبر است)؛
  *  • رزرو پرداخت‌شده بود — خبر «رزرو جدید» فقط بعد از پرداخت به او رفته
  *    (`notifyBookingConfirmed`)، پس لغوِ رزروِ پرداخت‌نشده خبری است که هرگز
  *    سابقه نداشته؛
@@ -199,13 +204,19 @@ export async function notifyBookingCancelled(
   if (refund > 0) notifyPattern(await phoneOf(b.userId), 'booking_cancelled_refund', [who, cName, cDate, faNum(refund)])
   else notifyPattern(await phoneOf(b.userId), 'booking_cancelled', [who, cName, cDate])
 
-  if (opts.by === 'owner' || !opts.wasPaid) return
+  if (!opts.wasPaid) return
   if (!club || club.ownerId === b.userId) return
-  const target = club.notifyPhone ?? (club.ownerId ? await phoneOf(club.ownerId) : null)
+  const ownerPhone = club.ownerId ? await phoneOf(club.ownerId) : null
+  const target = club.notifyPhone ?? ownerPhone
+  /* مالک خودش لغو کرده ⟵ او می‌داند. ولی اگر «شماره‌ی اطلاع‌رسانی» دیگری
+     (مدیرِ باشگاه) ثبت شده، آن آدم از لغوِ مالک خبر ندارد و باید بگیرد. */
+  if (opts.by === 'owner' && (!club.notifyPhone || digitsOf(club.notifyPhone) === digitsOf(ownerPhone))) return
   const ownerName = club.ownerId ? await nameOf(club.ownerId) : ''
-  /* «توسط {5}»: نامِ رزروکننده وقتی خودش لغو کرده؛ وقتی ادمین لغو کرده
-     نامِ رزروکننده غلط می‌بود، پس نامِ پشتیبانی. */
-  const by = opts.by === 'admin' ? 'پشتیبانی سایت' : (who || 'رزروکننده')
+  /* «توسط {5}»: نامِ رزروکننده وقتی خودش لغو کرده؛ وقتی ادمین یا مالک
+     لغو کرده نامِ رزروکننده غلط می‌بود. */
+  const by = opts.by === 'admin' ? 'پشتیبانی سایت'
+    : opts.by === 'owner' ? 'مالک باشگاه'
+    : (who || 'رزروکننده')
   notifyPattern(target, 'booking_cancelled_for_owner',
     [ownerName, (await tableNameOf(b.tableId)) || 'یک میز', cName, cDate, faTimeRange(b.timeSlots), by])
 }
